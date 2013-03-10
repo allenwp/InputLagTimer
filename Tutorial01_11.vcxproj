@@ -348,9 +348,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Tutorial01.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Model.h" />
     <CLInclude Include="resource.h" />
     <ResourceCompile Include="Tutorial01.rc" />
   </ItemGroup>
