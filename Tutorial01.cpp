@@ -183,13 +183,13 @@ HRESULT InitDevice()
     sd.BufferDesc.Width = width;
     sd.BufferDesc.Height = height;
     sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.BufferDesc.RefreshRate.Numerator = 60;
+    sd.BufferDesc.RefreshRate.Numerator = 0;
     sd.BufferDesc.RefreshRate.Denominator = 1;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd.OutputWindow = g_hWnd;
     sd.SampleDesc.Count = 1;
     sd.SampleDesc.Quality = 0;
-    sd.Windowed = TRUE;
+    sd.Windowed = FALSE;
 
     for( UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++ )
     {
@@ -235,7 +235,10 @@ HRESULT InitDevice()
 void Render()
 {
     // Just clear the backbuffer
-    float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; //red,green,blue,alpha
+	float red = (double)rand() / (double)RAND_MAX;
+	float green = (double)rand() / (double)RAND_MAX;
+	float blue = (double)rand() / (double)RAND_MAX;
+    float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha
     g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
     g_pSwapChain->Present( 0, 0 );
 }
