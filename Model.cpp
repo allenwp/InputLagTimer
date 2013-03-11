@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "Model.h"
-#include <Windows.h>
 
 Model::Model(void)
   : mFps(0)
