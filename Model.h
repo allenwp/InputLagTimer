@@ -7,21 +7,24 @@ public:
    */
   union ValueType
   {
+    UINT32 container;
+    struct
+    {
     /**
      * Range of 0-999
      */
     UINT16 high;
-    
+
     /**
      * Range of 0-99
      */
     UINT16 low;
+    } value;
   };
 
   Model(void);
   virtual ~Model(void);
 
-  void initialize();
   void update();
 
   ValueType* getValuePtr();

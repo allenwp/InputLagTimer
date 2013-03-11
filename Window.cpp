@@ -1,9 +1,38 @@
 #include "stdafx.h"
 #include "Window.h"
+#include <assert.h>
 
 #define MAX_LOADSTRING 100
+bool windowClassRegistered = false;
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+
+ATOM Window::RegisterWndClass(HINSTANCE hInstance)
+{
+	WNDCLASSEX wcex;
+
+  // Initialize global strings
+	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_INPUTLAGTIMER, szWindowClass, MAX_LOADSTRING);
+
+	wcex.cbSize = sizeof(WNDCLASSEX);
+
+	wcex.style			= CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc	= Window::WndProc;
+	wcex.cbClsExtra		= 0;
+	wcex.cbWndExtra		= 0;
+	wcex.hInstance		= hInstance;
+	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_INPUTLAGTIMER));
+	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName	= NULL; // MAKEINTRESOURCE(IDC_INPUTLAGTIMER)
+	wcex.lpszClassName	= szWindowClass;
+	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+  windowClassRegistered = true;
+
+	return RegisterClassEx(&wcex);
+}
 
 HANDLE Window::CreateThread(HINSTANCE hInstance)
 {
@@ -22,6 +51,9 @@ HANDLE Window::CreateThread(HINSTANCE hInstance)
 //
 Window::Window(HINSTANCE hInstance)
 {
+  /* Window::RegisterWndClass(HINSTANCE hInstance) must be called first! */
+  assert(windowClassRegistered);
+
   mHInstance = hInstance;
 
   mHWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
@@ -42,40 +74,6 @@ DWORD WINAPI Window::StartWindowThread( __in  LPVOID lpParameter )
 	window.MessageLoop();
 
 	return 0;
-}
-
-ATOM Window::RegisterWndClass(HINSTANCE hInstance)
-{
-  // Initialize global strings
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_INPUTLAGTIMER, szWindowClass, MAX_LOADSTRING);
-	return MyRegisterClass(hInstance);
-}
-
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
-ATOM Window::MyRegisterClass(HINSTANCE hInstance)
-{
-	WNDCLASSEX wcex;
-
-	wcex.cbSize = sizeof(WNDCLASSEX);
-
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= Window::WndProc;
-	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_INPUTLAGTIMER));
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= NULL; // MAKEINTRESOURCE(IDC_INPUTLAGTIMER)
-	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-	return RegisterClassEx(&wcex);
 }
 
 //
@@ -116,7 +114,6 @@ void Window::MessageLoop()
   // Doing it with accelerators... Might want to bring this back at some point...
   //HACCEL hAccelTable;
 	//hAccelTable = LoadAccelerators(mHInstance, MAKEINTRESOURCE(IDC_INPUTLAGTIMER));
-
 	//// Main message loop:
 	//while (GetMessage(&msg, NULL, 0, 0))
 	//{
@@ -137,6 +134,8 @@ void Window::MessageLoop()
 		if (msg.message == WM_QUIT)
 			break;
 
+    // temporary for testing
+    mModel.update();
 		// TODO: Render(); or something
 
 		// Give other windows some time to process messages
