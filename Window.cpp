@@ -4,8 +4,12 @@
 
 #define MAX_LOADSTRING 100
 bool windowClassRegistered = false;
+bool windowCleanedUp = false;
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+
+D3D_DRIVER_TYPE         g_driverType = D3D_DRIVER_TYPE_NULL;
+D3D_FEATURE_LEVEL       g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 
 ATOM Window::RegisterWndClass(HINSTANCE hInstance)
 {
@@ -50,21 +54,40 @@ HANDLE Window::CreateThread(HINSTANCE hInstance)
 //        create and display the main program window.
 //
 Window::Window(HINSTANCE hInstance)
+  : g_pd3dDevice(NULL),
+  g_pImmediateContext(NULL),
+  g_pSwapChain(NULL),
+  g_pRenderTargetView(NULL)
 {
   /* Window::RegisterWndClass(HINSTANCE hInstance) must be called first! */
   assert(windowClassRegistered);
 
   mHInstance = hInstance;
 
+    RECT rc = { 0, 0, 640, 480 };
+  AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
+
   mHWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-  CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
+    NULL );
 
    ShowWindow(mHWnd, SW_SHOWDEFAULT);
+
+   // TODO: The Direct3D tutorial sample didn't have this call... and neither did the multiwindow code... figure out why...
    UpdateWindow(mHWnd);
+
+  if( FAILED( InitDevice() ) )
+  {
+    CleanupDevice();
+  }
 }
 
 Window::~Window(void)
 {
+  if(!windowCleanedUp)
+  {
+    CleanupDevice();
+  }
 }
 
 DWORD WINAPI Window::StartWindowThread( __in  LPVOID lpParameter )
@@ -107,6 +130,105 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return 0;
 }
 
+//--------------------------------------------------------------------------------------
+// Create Direct3D device and swap chain
+//--------------------------------------------------------------------------------------
+HRESULT Window::InitDevice()
+{
+  HRESULT hr = S_OK;
+
+  RECT rc;
+  GetClientRect( mHWnd, &rc );
+  UINT width = rc.right - rc.left;
+  UINT height = rc.bottom - rc.top;
+
+  UINT createDeviceFlags = 0;
+#ifdef _DEBUG
+  createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+  D3D_DRIVER_TYPE driverTypes[] =
+  {
+    D3D_DRIVER_TYPE_HARDWARE,
+    D3D_DRIVER_TYPE_WARP,
+    D3D_DRIVER_TYPE_REFERENCE,
+  };
+  UINT numDriverTypes = ARRAYSIZE( driverTypes );
+
+  D3D_FEATURE_LEVEL featureLevels[] =
+  {
+    D3D_FEATURE_LEVEL_11_0,
+    D3D_FEATURE_LEVEL_10_1,
+    D3D_FEATURE_LEVEL_10_0,
+  };
+  UINT numFeatureLevels = ARRAYSIZE( featureLevels );
+
+  DXGI_SWAP_CHAIN_DESC sd;
+  ZeroMemory( &sd, sizeof( sd ) );
+  sd.BufferCount = 1;
+  sd.BufferDesc.Width = width;
+  sd.BufferDesc.Height = height;
+  sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  sd.BufferDesc.RefreshRate.Numerator = 0;
+  sd.BufferDesc.RefreshRate.Denominator = 1;
+  sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  sd.OutputWindow = mHWnd;
+  sd.SampleDesc.Count = 1;
+  sd.SampleDesc.Quality = 0;
+  sd.Windowed = TRUE;
+
+  for( UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++ )
+  {
+    g_driverType = driverTypes[driverTypeIndex];
+    hr = D3D11CreateDeviceAndSwapChain( NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
+      D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &g_featureLevel, &g_pImmediateContext );
+    if( SUCCEEDED( hr ) )
+      break;
+  }
+  if( FAILED( hr ) )
+    return hr;
+
+  // Create a render target view
+  ID3D11Texture2D* pBackBuffer = NULL;
+  hr = g_pSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&pBackBuffer );
+  if( FAILED( hr ) )
+    return hr;
+
+  hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
+  pBackBuffer->Release();
+  if( FAILED( hr ) )
+    return hr;
+
+  g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, NULL );
+
+  // Setup the viewport
+  D3D11_VIEWPORT vp;
+  vp.Width = (FLOAT)width;
+  vp.Height = (FLOAT)height;
+  vp.MinDepth = 0.0f;
+  vp.MaxDepth = 1.0f;
+  vp.TopLeftX = 0;
+  vp.TopLeftY = 0;
+  g_pImmediateContext->RSSetViewports( 1, &vp );
+
+  return S_OK;
+}
+
+//--------------------------------------------------------------------------------------
+// Clean up the objects we've created
+//--------------------------------------------------------------------------------------
+void Window::CleanupDevice()
+{
+  if( g_pImmediateContext ) g_pImmediateContext->ClearState();
+
+  if( g_pRenderTargetView ) g_pRenderTargetView->Release();
+  if( g_pSwapChain ) g_pSwapChain->Release();
+  if( g_pImmediateContext ) g_pImmediateContext->Release();
+  if( g_pd3dDevice ) g_pd3dDevice->Release();
+
+  windowCleanedUp = true;
+}
+
 void Window::MessageLoop()
 {
 	MSG msg;
@@ -123,6 +245,22 @@ void Window::MessageLoop()
 	//		DispatchMessage(&msg);
 	//	}
 	//}
+
+  // The way that the direct3d tutorial did it...
+  //// Main message loop
+  //MSG msg = {0};
+  //while( WM_QUIT != msg.message )
+  //{
+  //  if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
+  //  {
+  //    TranslateMessage( &msg );
+  //    DispatchMessage( &msg );
+  //  }
+  //  else
+  //  {
+  //    Render();
+  //  }
+  //}
   
 	while( true )
 	{
@@ -136,10 +274,24 @@ void Window::MessageLoop()
 
     // temporary for testing
     mModel.update();
-		// TODO: Render(); or something
+		Render();
 
 		// Give other windows some time to process messages
     Sleep(1);
 		// TODO: usleep(100ULL);
 	}
+}
+
+//--------------------------------------------------------------------------------------
+// Render the frame
+//--------------------------------------------------------------------------------------
+void Window::Render()
+{
+  // Just clear the backbuffer
+  float red = (double)rand() / (double)RAND_MAX;
+  float green = (double)rand() / (double)RAND_MAX;
+  float blue = (double)rand() / (double)RAND_MAX;
+  float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha
+  g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
+  g_pSwapChain->Present( 0, 0 );
 }

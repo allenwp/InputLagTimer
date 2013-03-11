@@ -19,7 +19,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return -1;
 	}
 
-	HANDLE threads[3];
+	HANDLE threads[2];
 
 	for (int i = 0; i < _countof(threads); i++)
   {
