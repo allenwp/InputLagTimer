@@ -6,7 +6,7 @@
 #define MAX_LOADSTRING 100
 bool windowClassRegistered = false;
 bool windowCleanedUp = false;
-bool hasPostInit = false;
+bool shouldPostInit = false;
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
@@ -70,11 +70,13 @@ Window::Window(Window::ThreadArgs* threadArgs)
   //mTarget.adapter->AddRef();
   //mTarget.output->AddRef();
 
+  delete threadArgs;
+
     RECT rc = { 0, 0, 1024, 768 };
   AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 
   mHWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, threadArgs->hInstance,
+    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, mHInstance,
     NULL );
 
    ShowWindow(mHWnd, SW_SHOWDEFAULT);
@@ -221,6 +223,8 @@ HRESULT Window::InitDevice()
   vp.TopLeftY = 0;
   g_pImmediateContext->RSSetViewports( 1, &vp );
 
+  shouldPostInit = true;
+
   return S_OK;
 }
 
@@ -253,12 +257,12 @@ void Window::postInit()
   {
     pFactory->Release();
   }
-  hasPostInit = true;
+  shouldPostInit = false;
 }
 
 void Window::MessageLoop()
 {
-  if(!hasPostInit)
+  if(shouldPostInit)
   {
     postInit();
   }

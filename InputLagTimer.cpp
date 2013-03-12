@@ -60,7 +60,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
     args->hInstance = hInstance;
     args->target = targets[i];
     threads[i] = Window::CreateThread(args);
-    delete args;
   }
 
   //for(auto iter = targets.begin(); iter != targets.end(); ++iter)
