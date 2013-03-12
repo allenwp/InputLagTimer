@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "Window.h"
 #include <assert.h>
+#include <vector>
 
 #define MAX_LOADSTRING 100
 bool windowClassRegistered = false;
 bool windowCleanedUp = false;
+bool hasPostInit = false;
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
@@ -38,9 +40,10 @@ ATOM Window::RegisterWndClass(HINSTANCE hInstance)
 	return RegisterClassEx(&wcex);
 }
 
-HANDLE Window::CreateThread(HINSTANCE hInstance)
+HANDLE Window::CreateThread(Window::ThreadArgs* threadArgs)
 {
-	return ::CreateThread(NULL, 0, Window::StartWindowThread, hInstance, 9, NULL);
+  // TODO: re-architect this so that I can pass in actual parameters
+	return ::CreateThread(NULL, 0, Window::StartWindowThread, threadArgs, 9, NULL);
 }
 
 //
@@ -53,7 +56,7 @@ HANDLE Window::CreateThread(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-Window::Window(HINSTANCE hInstance)
+Window::Window(Window::ThreadArgs* threadArgs)
   : g_pd3dDevice(NULL),
   g_pImmediateContext(NULL),
   g_pSwapChain(NULL),
@@ -62,13 +65,16 @@ Window::Window(HINSTANCE hInstance)
   /* Window::RegisterWndClass(HINSTANCE hInstance) must be called first! */
   assert(windowClassRegistered);
 
-  mHInstance = hInstance;
+  mHInstance = threadArgs->hInstance;
+  mTarget = threadArgs->target;
+  //mTarget.adapter->AddRef();
+  //mTarget.output->AddRef();
 
-    RECT rc = { 0, 0, 640, 480 };
+    RECT rc = { 0, 0, 1024, 768 };
   AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 
   mHWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
+    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, threadArgs->hInstance,
     NULL );
 
    ShowWindow(mHWnd, SW_SHOWDEFAULT);
@@ -84,6 +90,8 @@ Window::Window(HINSTANCE hInstance)
 
 Window::~Window(void)
 {
+  mTarget.adapter->Release();
+  mTarget.output->Release();
   if(!windowCleanedUp)
   {
     CleanupDevice();
@@ -92,7 +100,7 @@ Window::~Window(void)
 
 DWORD WINAPI Window::StartWindowThread( __in  LPVOID lpParameter )
 {
-	Window window((HINSTANCE)lpParameter);
+	Window window((Window::ThreadArgs*)lpParameter);
 
 	window.MessageLoop();
 
@@ -180,8 +188,10 @@ HRESULT Window::InitDevice()
   for( UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++ )
   {
     g_driverType = driverTypes[driverTypeIndex];
+
     hr = D3D11CreateDeviceAndSwapChain( NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
       D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &g_featureLevel, &g_pImmediateContext );
+
     if( SUCCEEDED( hr ) )
       break;
   }
@@ -229,8 +239,30 @@ void Window::CleanupDevice()
   windowCleanedUp = true;
 }
 
+void Window::postInit()
+{
+  IDXGIFactory1 * pFactory;
+  HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&pFactory) );
+  if(SUCCEEDED(hr))
+  {
+    pFactory->MakeWindowAssociation(mHWnd, 0);
+
+    g_pSwapChain->SetFullscreenState(TRUE, mTarget.output);
+  }
+  if(pFactory)
+  {
+    pFactory->Release();
+  }
+  hasPostInit = true;
+}
+
 void Window::MessageLoop()
 {
+  if(!hasPostInit)
+  {
+    postInit();
+  }
+
 	MSG msg;
 
   // Doing it with accelerators... Might want to bring this back at some point...

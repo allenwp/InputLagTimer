@@ -7,9 +7,21 @@
 class Window
 {
 public:
+  struct SwapChainTarget
+  {
+    IDXGIAdapter1* adapter;
+    IDXGIOutput* output;
+  };
+
+  struct ThreadArgs
+  {
+    HINSTANCE hInstance;
+    SwapChainTarget target;
+  };
+
 	static ATOM RegisterWndClass(HINSTANCE hInstance);
-  static HANDLE CreateThread(HINSTANCE hInstance);
-  Window(HINSTANCE hInstance);
+  static HANDLE CreateThread(Window::ThreadArgs* threadArgs);
+  Window(Window::ThreadArgs* threadArgs);
   virtual ~Window(void);
 
 private:
@@ -18,10 +30,12 @@ private:
 
   HRESULT InitDevice();
   void CleanupDevice();
+  void postInit();
   void MessageLoop();
   void Render();
 
   HINSTANCE mHInstance;
+  Window::SwapChainTarget mTarget;
   HWND mHWnd;
 
   Model mModel;

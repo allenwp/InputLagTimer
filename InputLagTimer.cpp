@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "InputLagTimer.h"
 #include "Window.h"
+#include <vector>
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -20,11 +21,53 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	HANDLE threads[2];
+  std::vector<Window::SwapChainTarget> targets;
+  
+  IDXGIFactory1 * pFactory;
+  HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&pFactory) );
+  if(SUCCEEDED(hr))
+  {
+    UINT i = 0;
+    IDXGIAdapter1 * pAdapter;
+    while(SUCCEEDED(pFactory->EnumAdapters1(i, &pAdapter)))
+    {
+      UINT j = 0;
+      IDXGIOutput * pOutput;
+      while(pAdapter->EnumOutputs(j, &pOutput) != DXGI_ERROR_NOT_FOUND)
+      {
+        if(targets.size() < 2)
+        {
+          Window::SwapChainTarget target;
+          pAdapter->AddRef();
+          pOutput->AddRef();
+          target.adapter = pAdapter;
+          target.output = pOutput;
+          targets.push_back(target);
+        }
+        ++j;
+      }
+      ++i;
+    }
+  }
+  if(pFactory)
+  {
+    pFactory->Release();
+  }
 
 	for (int i = 0; i < _countof(threads); i++)
   {
-		threads[i] = Window::CreateThread(hInstance);
+    Window::ThreadArgs* args = new Window::ThreadArgs();
+    args->hInstance = hInstance;
+    args->target = targets[i];
+    threads[i] = Window::CreateThread(args);
+    delete args;
   }
+
+  //for(auto iter = targets.begin(); iter != targets.end(); ++iter)
+  //{
+  //  iter->adapter->Release();
+  //  iter->output->Release();
+  //}
 
 	WaitForMultipleObjects(_countof(threads), threads, TRUE, INFINITE);
 
