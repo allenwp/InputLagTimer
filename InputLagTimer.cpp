@@ -58,15 +58,17 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
   {
     Window::ThreadArgs* args = new Window::ThreadArgs();
     args->hInstance = hInstance;
-    args->target = targets[i];
+    if(targets.size() > i)
+    {
+      args->target = targets[i];
+    }
+    else
+    {
+      args->target.adapter = nullptr;
+      args->target.output = nullptr;
+    }
     threads[i] = Window::CreateThread(args);
   }
-
-  //for(auto iter = targets.begin(); iter != targets.end(); ++iter)
-  //{
-  //  iter->adapter->Release();
-  //  iter->output->Release();
-  //}
 
 	WaitForMultipleObjects(_countof(threads), threads, TRUE, INFINITE);
 

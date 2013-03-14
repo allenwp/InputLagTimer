@@ -30,7 +30,6 @@ private:
 
   HRESULT InitDevice();
   void CleanupDevice();
-  void postInit();
   void MessageLoop();
   void Render();
 

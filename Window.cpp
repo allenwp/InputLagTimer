@@ -67,8 +67,14 @@ Window::Window(Window::ThreadArgs* threadArgs)
 
   mHInstance = threadArgs->hInstance;
   mTarget = threadArgs->target;
-  //mTarget.adapter->AddRef();
-  //mTarget.output->AddRef();
+  if(mTarget.adapter)
+  {
+    mTarget.adapter->AddRef();
+  }
+  if(mTarget.output)
+  {
+    mTarget.output->AddRef();
+  }
 
   delete threadArgs;
 
@@ -82,7 +88,7 @@ Window::Window(Window::ThreadArgs* threadArgs)
    ShowWindow(mHWnd, SW_SHOWDEFAULT);
 
    // TODO: The Direct3D tutorial sample didn't have this call... and neither did the multiwindow code... figure out why...
-   UpdateWindow(mHWnd);
+   //UpdateWindow(mHWnd);
 
   if( FAILED( InitDevice() ) )
   {
@@ -92,8 +98,14 @@ Window::Window(Window::ThreadArgs* threadArgs)
 
 Window::~Window(void)
 {
-  mTarget.adapter->Release();
-  mTarget.output->Release();
+  if(mTarget.adapter)
+  {
+    mTarget.adapter->Release();
+  }
+  if(mTarget.output)
+  {
+    mTarget.output->Release();
+  }
   if(!windowCleanedUp)
   {
     CleanupDevice();
@@ -243,33 +255,10 @@ void Window::CleanupDevice()
   windowCleanedUp = true;
 }
 
-void Window::postInit()
-{
-  IDXGIFactory1 * pFactory;
-  HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&pFactory) );
-  if(SUCCEEDED(hr))
-  {
-    pFactory->MakeWindowAssociation(mHWnd, 0);
-
-    g_pSwapChain->SetFullscreenState(TRUE, mTarget.output);
-  }
-  if(pFactory)
-  {
-    pFactory->Release();
-  }
-  shouldPostInit = false;
-}
-
 void Window::MessageLoop()
 {
-  if(shouldPostInit)
-  {
-    postInit();
-  }
-
-	MSG msg;
-
   // Doing it with accelerators... Might want to bring this back at some point...
+	//MSG msg;
   //HACCEL hAccelTable;
 	//hAccelTable = LoadAccelerators(mHInstance, MAKEINTRESOURCE(IDC_INPUTLAGTIMER));
 	//// Main message loop:
@@ -283,39 +272,42 @@ void Window::MessageLoop()
 	//}
 
   // The way that the direct3d tutorial did it...
-  //// Main message loop
-  //MSG msg = {0};
-  //while( WM_QUIT != msg.message )
-  //{
-  //  if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
-  //  {
-  //    TranslateMessage( &msg );
-  //    DispatchMessage( &msg );
-  //  }
-  //  else
-  //  {
-  //    Render();
-  //  }
-  //}
-  
-	while( true )
-	{
-		while (PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ))
-		{
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
-		}
-		if (msg.message == WM_QUIT)
-			break;
+  // Main message loop
+  MSG msg = {0};
+  while( WM_QUIT != msg.message )
+  {
+    if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
+    {
+      TranslateMessage( &msg );
+      DispatchMessage( &msg );
+    }
+    else
+    {
+      mModel.update();
+      Render();
+    }
+  }
 
-    // temporary for testing
-    mModel.update();
-		Render();
+  // The way from the multimonitor/usleep article
+	//MSG msg;
+	//while( true )
+	//{
+	//	while (PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ))
+	//	{
+	//		TranslateMessage( &msg );
+	//		DispatchMessage( &msg );
+	//	}
+	//	if (msg.message == WM_QUIT)
+	//		break;
 
-		// Give other windows some time to process messages
-    Sleep(1);
-		// TODO: usleep(100ULL);
-	}
+ //   // temporary for testing
+ //   mModel.update();
+	//	Render();
+
+	//	// Give other windows some time to process messages
+ //   Sleep(1);
+	//	// TODO: usleep(100ULL);
+	//}
 }
 
 //--------------------------------------------------------------------------------------
