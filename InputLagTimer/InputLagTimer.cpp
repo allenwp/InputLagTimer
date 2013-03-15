@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "InputLagTimer.h"
+#include "Setup.h"
 
 #define MAX_LOADSTRING 100
 
