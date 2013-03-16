@@ -27,7 +27,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
  	// TODO: Place code here.
-	MSG msg;
 	HACCEL hAccelTable;
 
 	// Initialize global strings
@@ -41,22 +40,33 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
+  init(hInst);
+  GetAdapter();
+  CreateWindowsForOutputs();
+  CreateSwapChainsAndViews();
+
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_INPUTLAGTIMER));
 
-	// Main message loop:
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+  // Main message loop
+  MSG msg = {0};
+  while( WM_QUIT != msg.message )
+  {
+      if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
+      {
+	  	  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+	  	  {
+	  		  TranslateMessage(&msg);
+	  		  DispatchMessage(&msg);
+	  	  }
+      }
+      else
+      {
+          MultiRender();
+      }
+  }
 
 	return (int) msg.wParam;
 }
-
-
 
 //
 //  FUNCTION: MyRegisterClass()

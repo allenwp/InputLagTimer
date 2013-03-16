@@ -1,7 +1,7 @@
 #ifndef _SETUP_H_
 
 #include "stdafx.h"
-#include <d3d11.h>
+#include <d3d10.h>
 
 struct WindowDataContainer
 {
@@ -17,6 +17,8 @@ struct WindowDataContainer
 };
 
 void init(HINSTANCE hInst);
+ATOM RegisterWndClass(HINSTANCE hInstance);
+LRESULT CALLBACK SecondaryWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 void GetAdapter();
 void EnumOutputsOnAdapter();
 void CreateWindowsForOutputs();

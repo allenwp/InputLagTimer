@@ -2,13 +2,57 @@
 #include "Setup.h"
 #include <vector>
 
-IDXGIFactory1* g_pDXGIFactory = NULL;
+IDXGIFactory* g_pDXGIFactory = NULL;
 HINSTANCE g_hInstance;
+
+TCHAR g_szWindowedName[] = L"something";					// The title bar text
+TCHAR g_szWindowClass[] = L"Aclass";			// the main window class name
 
 void init(HINSTANCE hInst)
 {
   g_hInstance = hInst;
-  CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&g_pDXGIFactory) );
+  CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&g_pDXGIFactory) );
+  RegisterWndClass(hInst);
+}
+
+ATOM RegisterWndClass(HINSTANCE hInstance)
+{
+  WNDCLASS wc;
+
+  wc.style	= CS_HREDRAW | CS_VREDRAW;
+  wc.lpfnWndProc	= SecondaryWndProc;
+  wc.cbClsExtra	= 0;
+  wc.cbWndExtra	= 0;
+  wc.hInstance	= hInstance;
+  wc.hIcon	= NULL;
+  wc.hCursor	= LoadCursor(NULL, IDC_ARROW);
+  wc.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+  wc.lpszMenuName	= NULL; // MAKEINTRESOURCE(IDC_INPUTLAGTIMER)
+  wc.lpszClassName	= g_szWindowClass;
+
+  return RegisterClass(&wc);
+}
+
+LRESULT CALLBACK SecondaryWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+  PAINTSTRUCT ps;
+  HDC hdc;
+
+  switch (message)
+  {
+  case WM_PAINT:
+    // TODO: The multitheaded GUI didn't handle this message type... Figure out why...
+    hdc = BeginPaint(hWnd, &ps);
+    // TODO: Add any drawing code here...
+    EndPaint(hWnd, &ps);
+    break;
+  case WM_DESTROY:
+    PostQuitMessage(0);
+    break;
+  default:
+    return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+  return 0;
 }
 
 IDXGIAdapter* g_pDXGIAdapter = NULL; // set to null, init by yourself
@@ -58,16 +102,16 @@ void CreateWindowsForOutputs()
         IDXGIOutput* p_Output = OutputArray.at(i);
         DXGI_OUTPUT_DESC OutputDesc;
         p_Output->GetDesc( &OutputDesc );
-        int x = OutputDesc.DesktopCoordinates.left;
-        int y = OutputDesc.DesktopCoordinates.top;
-        int width = OutputDesc.DesktopCoordinates.right - x;
-        int height = OutputDesc.DesktopCoordinates.bottom - y;
+        int x = 0;//OutputDesc.DesktopCoordinates.left;
+        int y = 0;//OutputDesc.DesktopCoordinates.top;
+        int width = 1024;//OutputDesc.DesktopCoordinates.right - x;
+        int height = 768;//OutputDesc.DesktopCoordinates.bottom - y;
 
         WindowDataContainer *p_Window = new WindowDataContainer;
 
-        p_Window->hWnd = CreateWindow( L"MY_SUPER_CLASS",
-                                        L"MY_SUPER_NAME",
-                                        WS_POPUP,
+        p_Window->hWnd = CreateWindow( g_szWindowClass,
+                                        g_szWindowedName,
+                                        WS_OVERLAPPEDWINDOW,
                                         x,
                                         y,
                                         width,
@@ -76,7 +120,7 @@ void CreateWindowsForOutputs()
                                         0,
                                         g_hInstance,
                                         NULL );
-
+        DWORD error = GetLastError();
         // show the window
         ShowWindow( p_Window->hWnd, SW_SHOWDEFAULT );
 
@@ -99,22 +143,33 @@ void CreateWindowsForOutputs()
 ID3D10Device* g_pD3DDevice = NULL;
 void CreateSwapChainsAndViews()
 {
+  D3D10CreateDevice(g_pDXGIAdapter, D3D10_DRIVER_TYPE_HARDWARE, NULL, 0, D3D10_SDK_VERSION, &g_pD3DDevice);
+
     for( int i = 0; i < WindowsArray.size(); i++ )
     {
         WindowDataContainer* p_Window = WindowsArray.at(i);
 
         // get the dxgi device
         IDXGIDevice* pDXGIDevice = NULL;
-        g_pD3DDevice->QueryInterface( IID_IDXGIDevice, ( void** )&pDXGIDevice ); // COM stuff, hopefully you are familiar
+        HRESULT result = g_pD3DDevice->QueryInterface( IID_IDXGIDevice, ( void** )&pDXGIDevice ); // COM stuff, hopefully you are familiar
 
         // create a swap chain
         DXGI_SWAP_CHAIN_DESC SwapChainDesc;
-
-        // fill it in
+        
+        ZeroMemory( &SwapChainDesc, sizeof( SwapChainDesc ) );
+        SwapChainDesc.BufferCount = 1;
+        SwapChainDesc.BufferDesc.Width = p_Window->width;
+        SwapChainDesc.BufferDesc.Height = p_Window->height;
+        SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        SwapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+        SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+        SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        SwapChainDesc.OutputWindow = p_Window->hWnd;
+        SwapChainDesc.SampleDesc.Count = 1;
+        SwapChainDesc.SampleDesc.Quality = 0;
+        SwapChainDesc.Windowed = TRUE;
 
         HRESULT hr = g_pDXGIFactory->CreateSwapChain( pDXGIDevice, &SwapChainDesc, &p_Window->p_SwapChain );
-        pDXGIDevice->Release();
-        pDXGIDevice = NULL;
 
          // get the backbuffer
         ID3D10Texture2D* p_BackBuffer = NULL;
@@ -125,30 +180,32 @@ void CreateSwapChainsAndViews()
         p_BackBuffer->GetDesc( &BackBufferDesc );
 
         // create the render target view
-        D3D10_RENDER_TARGET_VIEW_DESC RTVDesc;
+        //D3D10_RENDER_TARGET_VIEW_DESC RTVDesc;
 
         // fill it in
 
-        g_pD3DDevice->CreateRenderTargetView( p_BackBuffer, &RTVDesc, &p_Window->p_RenderTargetView );
+        g_pD3DDevice->CreateRenderTargetView( p_BackBuffer, NULL, &p_Window->p_RenderTargetView );
         p_BackBuffer->Release();
         p_BackBuffer = NULL;
 
-        // Create depth stencil texture
-        ID3D10Texture2D* p_DepthStencil = NULL;
-        D3D10_TEXTURE2D_DESC descDepth;
+        //// Create depth stencil texture
+        //ID3D10Texture2D* p_DepthStencil = NULL;
+        //D3D10_TEXTURE2D_DESC descDepth;
 
-        // fill it in
+        //// fill it in
 
 
-        g_pD3DDevice->CreateTexture2D( &descDepth, NULL, &p_DepthStencil );
+        //g_pD3DDevice->CreateTexture2D( &descDepth, NULL, &p_DepthStencil );
 
-        // Create the depth stencil view
-        D3D10_DEPTH_STENCIL_VIEW_DESC descDSV;
+        //// Create the depth stencil view
+        //D3D10_DEPTH_STENCIL_VIEW_DESC descDSV;
 
-        // fill it in
+        //// fill it in
 
-        g_pD3DDevice->CreateDepthStencilView( p_DepthStencil, &descDSV, &p_Window->p_DepthStencilView );
+        //g_pD3DDevice->CreateDepthStencilView( p_DepthStencil, &descDSV, &p_Window->p_DepthStencilView );
 
+        pDXGIDevice->Release();
+        pDXGIDevice = NULL;
     }
 
 }
@@ -161,7 +218,7 @@ void MultiRender( )
         WindowDataContainer* p_Window = WindowsArray.at(i);
 
         // There is the answer to your second question:
-        g_pD3DDevice->OMSetRenderTargets( 1, &p_Window->p_RenderTargetView, p_Window->p_DepthStencilView );
+        g_pD3DDevice->OMSetRenderTargets( 1, &p_Window->p_RenderTargetView, NULL );
 
         // Don't forget to adjust the viewport, in fullscreen it's not important...
         D3D10_VIEWPORT Viewport;
@@ -174,6 +231,22 @@ void MultiRender( )
         g_pD3DDevice->RSSetViewports( 1, &Viewport );
 
         // TO DO: AMAZING STUFF PER WINDOW
+        // Just clear the backbuffer
+        float red = (double)rand() / (double)RAND_MAX;
+        float green = (double)rand() / (double)RAND_MAX;
+        float blue = (double)rand() / (double)RAND_MAX;
+        float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
+        if(i == 0)
+        {
+          ClearColor[0] = 1.0;
+        }
+        else
+        {
+          ClearColor[1] = 1.0;
+          ClearColor[2] = 1.0;
+        }
+        g_pD3DDevice->ClearRenderTargetView( p_Window->p_RenderTargetView, ClearColor );
+        p_Window->p_SwapChain->Present( 0, 0 );
     }
 }
 
