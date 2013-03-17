@@ -5,6 +5,7 @@
 #include "InputLagTimer.h"
 #include "Tutorial.h"
 #include "Setup.h"
+#include "WindowManager.h"
 
 #define MAX_LOADSTRING 100
 
@@ -12,15 +13,13 @@
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-bool timerStarted = false;
+WindowManager* windowManager = nullptr;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
-
-void Start(const Setup::Settings& settings);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -44,9 +43,13 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
+  //init(hInst);
+  //GetAdapter();
+  //CreateWindowsForOutputs();
+  //CreateSwapChainsAndViews();
+
   Setup* setup = new Setup();
-  Setup::Settings settings = setup->pickSettings();
-  Start(settings);
+  windowManager = new WindowManager(setup->getSettings());
   delete setup;
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_INPUTLAGTIMER));
@@ -55,7 +58,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
   MSG msg = {0};
   while( WM_QUIT != msg.message )
   {
-    if(!timerStarted)
+    if(!windowManager)
     {
 	    GetMessage(&msg, NULL, 0, 0);
 		  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -76,7 +79,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
       }
       else
       {
-        MultiRender();
+        //MultiRender();
+        windowManager->render();
       }
     }
   }
@@ -206,14 +210,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
-}
-
-void Start(const Setup::Settings& settings)
-{
-  init(hInst);
-  GetAdapter();
-  CreateWindowsForOutputs();
-  CreateSwapChainsAndViews();
-  // TODO: create the windows, render targets, swap chains, devices, based on the settings
-  timerStarted = true;
 }

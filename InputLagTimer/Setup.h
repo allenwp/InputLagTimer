@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <dxgitype.h>
 
 class Setup
 {
@@ -27,9 +28,15 @@ public:
   Setup(void);
   virtual ~Setup(void);
 
-  Settings pickSettings();
+  const Settings& getSettings() const;
 
 protected:
+  /**
+   * Analyses the system using a DXGI factory to enumerate adapters
+   * and outputs. Chooses settings and fills in the mSettings structure.
+   */
   void analizeSystem();
+
+  Settings mSettings;
 };
 

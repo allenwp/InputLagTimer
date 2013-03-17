@@ -1,14 +1,14 @@
 #ifndef _SETUP_H_
 
 #include "stdafx.h"
-#include <d3d10.h>
+#include <d3d11.h>
 
 struct WindowDataContainer
 {
-    //Direct3D 10 stuff per window data
+    //Direct3D 11 stuff per window data
     IDXGISwapChain* p_SwapChain;
-    ID3D10RenderTargetView* p_RenderTargetView;
-    ID3D10DepthStencilView* p_DepthStencilView;
+    ID3D11RenderTargetView* p_RenderTargetView;
+    ID3D11DepthStencilView* p_DepthStencilView;
 
     // window goodies
     HWND hWnd;

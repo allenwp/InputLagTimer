@@ -140,10 +140,24 @@ void CreateWindowsForOutputs()
     }
 }
 
-ID3D10Device* g_pD3DDevice = NULL;
+ID3D11Device* g_pD3DDevice = NULL;
+ID3D11DeviceContext* g_pD3DDeviceContext = NULL;
 void CreateSwapChainsAndViews()
 {
-  D3D10CreateDevice(g_pDXGIAdapter, D3D10_DRIVER_TYPE_HARDWARE, NULL, 0, D3D10_SDK_VERSION, &g_pD3DDevice);
+  /* Any and all. I don't need anything more than a 9_1 */
+  D3D_FEATURE_LEVEL featureLevels[] =
+  {
+    D3D_FEATURE_LEVEL_11_0,
+    D3D_FEATURE_LEVEL_10_1,
+    D3D_FEATURE_LEVEL_10_0,
+    D3D_FEATURE_LEVEL_9_3,
+    D3D_FEATURE_LEVEL_9_2,
+    D3D_FEATURE_LEVEL_9_1,
+  };
+	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
+  D3D_FEATURE_LEVEL* featureLevel = nullptr;
+
+  D3D11CreateDevice(g_pDXGIAdapter, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, numFeatureLevels, D3D11_SDK_VERSION,  &g_pD3DDevice, featureLevel, &g_pD3DDeviceContext);
 
     for( int i = 0; i < WindowsArray.size(); i++ )
     {
@@ -172,15 +186,15 @@ void CreateSwapChainsAndViews()
         HRESULT hr = g_pDXGIFactory->CreateSwapChain( pDXGIDevice, &SwapChainDesc, &p_Window->p_SwapChain );
 
          // get the backbuffer
-        ID3D10Texture2D* p_BackBuffer = NULL;
-        hr = p_Window->p_SwapChain->GetBuffer( 0, IID_ID3D10Texture2D, ( void** )&p_BackBuffer );
+        ID3D11Texture2D* p_BackBuffer = NULL;
+        hr = p_Window->p_SwapChain->GetBuffer( 0, IID_ID3D11Texture2D, ( void** )&p_BackBuffer );
 
         // get the backbuffer desc
-        D3D10_TEXTURE2D_DESC BackBufferDesc;
+        D3D11_TEXTURE2D_DESC BackBufferDesc;
         p_BackBuffer->GetDesc( &BackBufferDesc );
 
         // create the render target view
-        //D3D10_RENDER_TARGET_VIEW_DESC RTVDesc;
+        //D3D11_RENDER_TARGET_VIEW_DESC RTVDesc;
 
         // fill it in
 
@@ -189,8 +203,8 @@ void CreateSwapChainsAndViews()
         p_BackBuffer = NULL;
 
         //// Create depth stencil texture
-        //ID3D10Texture2D* p_DepthStencil = NULL;
-        //D3D10_TEXTURE2D_DESC descDepth;
+        //ID3D11Texture2D* p_DepthStencil = NULL;
+        //D3D11_TEXTURE2D_DESC descDepth;
 
         //// fill it in
 
@@ -198,7 +212,7 @@ void CreateSwapChainsAndViews()
         //g_pD3DDevice->CreateTexture2D( &descDepth, NULL, &p_DepthStencil );
 
         //// Create the depth stencil view
-        //D3D10_DEPTH_STENCIL_VIEW_DESC descDSV;
+        //D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 
         //// fill it in
 
@@ -218,17 +232,17 @@ void MultiRender( )
         WindowDataContainer* p_Window = WindowsArray.at(i);
 
         // There is the answer to your second question:
-        g_pD3DDevice->OMSetRenderTargets( 1, &p_Window->p_RenderTargetView, NULL );
+        g_pD3DDeviceContext->OMSetRenderTargets( 1, &p_Window->p_RenderTargetView, NULL );
 
         // Don't forget to adjust the viewport, in fullscreen it's not important...
-        D3D10_VIEWPORT Viewport;
+        D3D11_VIEWPORT Viewport;
         Viewport.TopLeftX = 0;
         Viewport.TopLeftY = 0;
         Viewport.Width = p_Window->width;
         Viewport.Height = p_Window->height;
         Viewport.MinDepth = 0.0f;
         Viewport.MaxDepth = 1.0f;
-        g_pD3DDevice->RSSetViewports( 1, &Viewport );
+        g_pD3DDeviceContext->RSSetViewports( 1, &Viewport );
 
         // TO DO: AMAZING STUFF PER WINDOW
         // Just clear the backbuffer
@@ -245,7 +259,7 @@ void MultiRender( )
           ClearColor[1] = 1.0;
           ClearColor[2] = 1.0;
         }
-        g_pD3DDevice->ClearRenderTargetView( p_Window->p_RenderTargetView, ClearColor );
+        g_pD3DDeviceContext->ClearRenderTargetView( p_Window->p_RenderTargetView, ClearColor );
         p_Window->p_SwapChain->Present( 0, 0 );
     }
 }

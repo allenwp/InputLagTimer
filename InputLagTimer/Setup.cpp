@@ -11,10 +11,9 @@ Setup::~Setup(void)
 {
 }
 
-Setup::Settings Setup::pickSettings()
+const Setup::Settings& Setup::getSettings() const
 {
-  Settings setup;
-  return setup;
+  return mSettings;
 }
 
 void Setup::analizeSystem()
