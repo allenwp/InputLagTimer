@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "InputLagTimer.h"
 #include "Tutorial.h"
-#include <vector>
+#include "Setup.h"
 
 #define MAX_LOADSTRING 100
 
@@ -20,29 +20,7 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
-struct OutputSetting
-{
-  void* output;
-  double maxTimerResolution;
-  unsigned int width;
-  unsigned int height;
-  DXGI_RATIONAL refreshRate;
-};
-
-struct AdapterSetting
-{
-  void* adapter;
-  std::vector<OutputSetting> outputSettings;
-};
-
-struct Settings
-{
-  std::vector<AdapterSetting> adapterSettings;
-};
-
-void AnalizeSystem();
-Settings PickSettings();
-void Start(const Settings& settings);
+void Start(const Setup::Settings& settings);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -66,10 +44,10 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
-  init(hInst);
-  GetAdapter();
-  CreateWindowsForOutputs();
-  CreateSwapChainsAndViews();
+  Setup* setup = new Setup();
+  Setup::Settings settings = setup->pickSettings();
+  Start(settings);
+  delete setup;
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_INPUTLAGTIMER));
 
@@ -228,4 +206,14 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+void Start(const Setup::Settings& settings)
+{
+  init(hInst);
+  GetAdapter();
+  CreateWindowsForOutputs();
+  CreateSwapChainsAndViews();
+  // TODO: create the windows, render targets, swap chains, devices, based on the settings
+  timerStarted = true;
 }
