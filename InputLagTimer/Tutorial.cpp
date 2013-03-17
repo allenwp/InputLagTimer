@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Setup.h"
+#include "Tutorial.h"
 #include <vector>
 
 IDXGIFactory* g_pDXGIFactory = NULL;

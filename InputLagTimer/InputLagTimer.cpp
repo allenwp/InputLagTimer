@@ -3,7 +3,8 @@
 
 #include "stdafx.h"
 #include "InputLagTimer.h"
-#include "Setup.h"
+#include "Tutorial.h"
+#include <vector>
 
 #define MAX_LOADSTRING 100
 
@@ -11,12 +12,37 @@
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+bool timerStarted = false;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+
+struct OutputSetting
+{
+  void* output;
+  double maxTimerResolution;
+  unsigned int width;
+  unsigned int height;
+  DXGI_RATIONAL refreshRate;
+};
+
+struct AdapterSetting
+{
+  void* adapter;
+  std::vector<OutputSetting> outputSettings;
+};
+
+struct Settings
+{
+  std::vector<AdapterSetting> adapterSettings;
+};
+
+void AnalizeSystem();
+Settings PickSettings();
+void Start(const Settings& settings);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -51,6 +77,17 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
   MSG msg = {0};
   while( WM_QUIT != msg.message )
   {
+    if(!timerStarted)
+    {
+	    GetMessage(&msg, NULL, 0, 0);
+		  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		  {
+			  TranslateMessage(&msg);
+			  DispatchMessage(&msg);
+		  }
+    }
+    else
+    {
       if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
       {
 	  	  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -61,8 +98,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
       }
       else
       {
-          MultiRender();
+        MultiRender();
       }
+    }
   }
 
 	return (int) msg.wParam;
