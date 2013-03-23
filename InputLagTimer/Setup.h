@@ -7,16 +7,18 @@ class Setup
 public:
   struct OutputSetting
   {
-    void* output;
+    // TODO: Make reference counting happen in here
+    // Maybe make it a class instead?
+    IDXGIOutput* output;
     double maxTimerResolution;
-    unsigned int width;
-    unsigned int height;
-    DXGI_RATIONAL refreshRate;
+    DXGI_MODE_DESC bufferDesc;
   };
 
   struct AdapterSetting
   {
-    void* adapter;
+    // TODO: Make reference counting happen in here
+    // Maybe make it a class instead?
+    IDXGIAdapter* adapter;
     std::vector<OutputSetting> outputSettings;
   };
 
