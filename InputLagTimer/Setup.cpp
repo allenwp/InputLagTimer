@@ -9,6 +9,14 @@ Setup::Setup(void)
 
 Setup::~Setup(void)
 {
+  for(auto iter = mSettings.adapterSettings.begin(); iter != mSettings.adapterSettings.end(); ++iter)
+  {
+    iter->adapter->Release();
+    for(auto outIter = iter->outputSettings.begin(); outIter != iter->outputSettings.end(); ++outIter)
+    {
+      outIter->output->Release();
+    }
+  }
 }
 
 const Setup::Settings& Setup::getSettings() const
