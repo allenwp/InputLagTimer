@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Setup.h"
-#include <d3d11.h>
 
 Setup::Setup(void)
 {
@@ -50,9 +49,9 @@ void Setup::analizeSystem()
       outputSettings.maxTimerResolution = 0.0;
 
       // TODO: Is the output surface the right place to get this info???
-      IDXGISurface* outputSurface;
+      IDXGISurface* outputSurface = nullptr;
       output->GetDisplaySurfaceData(outputSurface);
-      DXGI_SURFACE_DESC* outputSurfaceDescription;
+      DXGI_SURFACE_DESC* outputSurfaceDescription = nullptr;
       outputSurface->GetDesc(outputSurfaceDescription);
       outputSettings.bufferDesc.Width = outputSurfaceDescription->Width;
       outputSettings.bufferDesc.Height = outputSurfaceDescription->Height;

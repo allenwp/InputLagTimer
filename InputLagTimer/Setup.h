@@ -1,14 +1,11 @@
 #pragma once
 #include <vector>
-#include <dxgitype.h>
 
 class Setup
 {
 public:
   struct OutputSetting
   {
-    // TODO: Make reference counting happen in here
-    // Maybe make it a class instead?
     IDXGIOutput* output;
     double maxTimerResolution;
     DXGI_MODE_DESC bufferDesc;
@@ -16,8 +13,6 @@ public:
 
   struct AdapterSetting
   {
-    // TODO: Make reference counting happen in here
-    // Maybe make it a class instead?
     IDXGIAdapter* adapter;
     std::vector<OutputSetting> outputSettings;
   };
