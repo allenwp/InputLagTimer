@@ -34,7 +34,6 @@ void Setup::analizeSystem()
   {
     AdapterSetting adapterSettings;
     adapterSettings.adapter = adapter;
-    adapter->AddRef();
 
     UINT j = 0;
     IDXGIOutput* output;
@@ -44,18 +43,19 @@ void Setup::analizeSystem()
       ZeroMemory(&outputSettings, sizeof(OutputSetting));
 
       outputSettings.output = output;
-      output->AddRef();
 
       outputSettings.maxTimerResolution = 0.0;
 
       // TODO: Is the output surface the right place to get this info???
-      IDXGISurface* outputSurface = nullptr;
-      output->GetDisplaySurfaceData(outputSurface);
-      DXGI_SURFACE_DESC* outputSurfaceDescription = nullptr;
-      outputSurface->GetDesc(outputSurfaceDescription);
-      outputSettings.bufferDesc.Width = outputSurfaceDescription->Width;
-      outputSettings.bufferDesc.Height = outputSurfaceDescription->Height;
-      outputSettings.bufferDesc.Format = outputSurfaceDescription->Format;
+      //IDXGISurface* outputSurface = nullptr;
+      //HRESULT result = output->GetDisplaySurfaceData(outputSurface);
+      //DXGI_SURFACE_DESC* outputSurfaceDescription = nullptr;
+      //outputSurface->GetDesc(outputSurfaceDescription);
+
+      // TODO: figure out where to get these instead of hardcoding them...
+      outputSettings.bufferDesc.Width = 1024; //outputSurfaceDescription->Width;
+      outputSettings.bufferDesc.Height = 768; //outputSurfaceDescription->Height;
+      outputSettings.bufferDesc.Format = DXGI_FORMAT_UNKNOWN; //outputSurfaceDescription->Format;
       outputSettings.bufferDesc.Scaling = DXGI_MODE_SCALING_CENTERED;
       outputSettings.bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
       // TODO: Don't hardcode the refresh rate: get it from the moinitor's current refresh rate
@@ -63,6 +63,8 @@ void Setup::analizeSystem()
       outputSettings.bufferDesc.RefreshRate.Denominator = 60;
 
       adapterSettings.outputSettings.push_back(outputSettings);
+
+      ++j;
     }
 
     mSettings.adapterSettings.push_back(adapterSettings);

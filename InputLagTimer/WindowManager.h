@@ -2,6 +2,7 @@
 #include "Setup.h"
 #include "Window.h"
 #include <map>
+#include <unordered_set>
 
 class WindowManager
 {
@@ -9,8 +10,8 @@ public:
   struct Device
   {
     int sortValue;
-    ID3D11Device* device;
-    ID3D11DeviceContext* deviceConext;
+    ID3D11Device* d3DDevice;
+    ID3D11DeviceContext* d3DDeviceConext;
   };
 
   WindowManager(const Setup::Settings& settings);
@@ -20,6 +21,8 @@ public:
 
 protected:
   std::multimap<Device*, Window*> mWindowMap;
+  std::unordered_set<IUnknown*> referencedObj;
 };
 
+// TODO: Verify that this is being called when accessing elements from the multimap
 bool operator <(const WindowManager::Device& lhs, const WindowManager::Device& rhs);
