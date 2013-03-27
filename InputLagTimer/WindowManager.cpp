@@ -22,8 +22,9 @@ WindowManager::WindowManager(const Setup::Settings& settings)
     };
 	  UINT numFeatureLevels = ARRAYSIZE(featureLevels);
     D3D_FEATURE_LEVEL* featureLevel = nullptr;
+    
     HRESULT result = D3D11CreateDevice(iter->adapter,
-      D3D_DRIVER_TYPE_HARDWARE,
+      D3D_DRIVER_TYPE_UNKNOWN,
       NULL,
       D3D11_CREATE_DEVICE_SINGLETHREADED,
       featureLevels,

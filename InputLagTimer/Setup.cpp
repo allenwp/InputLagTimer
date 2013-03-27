@@ -35,6 +35,7 @@ void Setup::analizeSystem()
     AdapterSetting adapterSettings;
     adapterSettings.adapter = adapter;
 
+    bool foundAnOutput = false;
     UINT j = 0;
     IDXGIOutput* output;
     while(adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND)
@@ -64,10 +65,14 @@ void Setup::analizeSystem()
 
       adapterSettings.outputSettings.push_back(outputSettings);
 
+      foundAnOutput = true;
       ++j;
     }
 
-    mSettings.adapterSettings.push_back(adapterSettings);
+    if(foundAnOutput)
+    {
+      mSettings.adapterSettings.push_back(adapterSettings);
+    }
 
     ++i;
   } 
