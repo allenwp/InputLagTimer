@@ -7,7 +7,7 @@ public:
   static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
   static TCHAR windowClassName[];
 
-  Window(void);
+  Window(HINSTANCE hInstance);
   virtual ~Window(void);
 
   unsigned int windowNumber;

@@ -49,7 +49,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
   //CreateSwapChainsAndViews();
 
   Setup* setup = new Setup();
-  windowManager = new WindowManager(setup->getSettings());
+  windowManager = new WindowManager(setup->getSettings(), hInstance);
   delete setup;
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_INPUTLAGTIMER));

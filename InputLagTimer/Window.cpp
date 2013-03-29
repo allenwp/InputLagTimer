@@ -51,12 +51,10 @@ Window::Window(HINSTANCE hInstance)
   windowName = new TCHAR[256]; /* 256 is max window name length */
   wsprintf(windowName, _T("Input Lag Timer - Output %i/%i"), 1, 1); // TODO
 
-   HWND hWnd = CreateWindow(windowClassName, windowName, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
-
-   ShowWindow(hWnd, SW_SHOWNORMAL);
-   UpdateWindow(hWnd);
-
+  HWND hWnd = CreateWindow(windowClassName, windowName, WS_OVERLAPPEDWINDOW,
+    CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+  ShowWindow(hWnd, SW_SHOWNORMAL);
+  UpdateWindow(hWnd);
 }
 
 

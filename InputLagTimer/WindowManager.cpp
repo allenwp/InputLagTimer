@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "WindowManager.h"
 
-WindowManager::WindowManager(const Setup::Settings& settings)
+WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstance)
 {
+  Window::registerWindow(hInstance);
+
   int deviceSortCount = 0;
   for(auto iter = settings.adapterSettings.begin(); iter != settings.adapterSettings.end(); ++iter)
   {
@@ -35,12 +37,12 @@ WindowManager::WindowManager(const Setup::Settings& settings)
       &device.d3DDeviceConext);
     if(S_OK == result)
     {
-      referencedObj.insert(device.d3DDevice);
-      referencedObj.insert(device.d3DDeviceConext);
+      mReferencedObj.insert(device.d3DDevice);
+      mReferencedObj.insert(device.d3DDeviceConext);
       for(auto outputIter = iter->outputSettings.begin(); outputIter != iter->outputSettings.end(); ++outputIter)
       {
-        // TODO: create the window and its swap chain, etc, etc.
-        // then set it as the value for the current multimap
+        Window* window = new Window(hInstance);
+        mWindowMap.insert(std::make_pair(device, window));
       }
 
       ++deviceSortCount;
@@ -50,9 +52,14 @@ WindowManager::WindowManager(const Setup::Settings& settings)
 
 WindowManager::~WindowManager(void)
 {
-  for(auto iter = referencedObj.begin(); iter != referencedObj.end(); ++iter)
+  for(auto iter = mReferencedObj.begin(); iter != mReferencedObj.end(); ++iter)
   {
     (*iter)->Release();
+  }
+
+  for(auto iter = mWindowMap.begin(); iter != mWindowMap.end(); ++iter)
+  {
+    delete iter->second;
   }
 }
 
