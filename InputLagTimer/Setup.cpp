@@ -54,14 +54,14 @@ void Setup::analizeSystem()
       //outputSurface->GetDesc(outputSurfaceDescription);
 
       // TODO: figure out where to get these instead of hardcoding them...
-      outputSettings.bufferDesc.Width = 1024; //outputSurfaceDescription->Width;
-      outputSettings.bufferDesc.Height = 768; //outputSurfaceDescription->Height;
-      outputSettings.bufferDesc.Format = DXGI_FORMAT_UNKNOWN; //outputSurfaceDescription->Format;
+      outputSettings.bufferDesc.Width = 1920; //outputSurfaceDescription->Width;
+      outputSettings.bufferDesc.Height = 1080; //outputSurfaceDescription->Height;
+      outputSettings.bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //outputSurfaceDescription->Format;
       outputSettings.bufferDesc.Scaling = DXGI_MODE_SCALING_CENTERED;
       outputSettings.bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
       // TODO: Don't hardcode the refresh rate: get it from the moinitor's current refresh rate
-      outputSettings.bufferDesc.RefreshRate.Numerator = 1;
-      outputSettings.bufferDesc.RefreshRate.Denominator = 60;
+      outputSettings.bufferDesc.RefreshRate.Numerator = 0;
+      outputSettings.bufferDesc.RefreshRate.Denominator = 1;
 
       adapterSettings.outputSettings.push_back(outputSettings);
 
@@ -75,5 +75,6 @@ void Setup::analizeSystem()
     }
 
     ++i;
-  } 
+  }
+  factory->Release();
 }

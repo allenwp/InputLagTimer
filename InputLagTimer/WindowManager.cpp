@@ -40,7 +40,7 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
       mReferencedObj.insert(device.d3DDeviceConext);
       for(auto outputIter = iter->outputSettings.begin(); outputIter != iter->outputSettings.end(); ++outputIter)
       {
-        Window* window = new Window(hInstance, *outputIter);
+        Window* window = new Window(hInstance, *outputIter, device);
         DeviceWindowPair pair;
         pair.device = device;
         pair.window = window;

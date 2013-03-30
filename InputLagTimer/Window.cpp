@@ -31,6 +31,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	PAINTSTRUCT ps;
 	HDC hdc;
 
+  // TODO: Handle ESC key?
 	switch (message)
 	{
 	case WM_PAINT:
@@ -47,18 +48,74 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return 0;
 }
 
-Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings)
+Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device)
 {
+  IDXGIFactory* factory = NULL;
+  CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&factory));
+  
+  /* Create the window */
   windowCount++;
   windowNumber = windowCount;
+  
+  DXGI_OUTPUT_DESC outputDesc;
+  outputSettings.output->GetDesc( &outputDesc );
+  int x = outputDesc.DesktopCoordinates.left;
+  int y = outputDesc.DesktopCoordinates.top;
+  // TODO: maybe width and height should be grabbed from somewhere else...
+  int width = outputDesc.DesktopCoordinates.right - x;
+  int height = outputDesc.DesktopCoordinates.bottom - y;
+  mWidth = width;
+  mHeight = height;
 
   windowName = new TCHAR[256]; /* 256 is max window name length */
   wsprintf(windowName, _T("Input Lag Timer - Output %i"), windowNumber); // TODO
 
-  HWND hWnd = CreateWindow(windowClassName, windowName, WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+  HWND hWnd = CreateWindow(windowClassName,
+    windowName,
+    WS_OVERLAPPEDWINDOW,
+    x,
+    y,
+    width,
+    height,
+    NULL,
+    NULL,
+    hInstance,
+    NULL);
+
+  // TODO: Could do something like this if I want, but I don't think it's necessary
+  //if(windowCount == 1)
+  //{
+  //  g_pDXGIFactory->MakeWindowAssociation( p_Window->hWnd, 0 );
+  //}
+
   ShowWindow(hWnd, SW_SHOWNORMAL);
   UpdateWindow(hWnd);
+  
+  /* Create the Swap Chain */
+  IDXGIDevice* dxgiDevice = NULL;
+  device.d3DDevice->QueryInterface(IID_IDXGIDevice, (void**)&dxgiDevice);
+
+  DXGI_SWAP_CHAIN_DESC swapChainDesc;
+  ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+  swapChainDesc.BufferDesc = outputSettings.bufferDesc;
+  swapChainDesc.SampleDesc.Count = 1;
+  swapChainDesc.SampleDesc.Quality = 0;
+  swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  swapChainDesc.BufferCount = 1;
+  swapChainDesc.OutputWindow = hWnd;
+  swapChainDesc.Windowed = TRUE;
+  swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;;
+  swapChainDesc.Flags = 0;
+
+  factory->CreateSwapChain(dxgiDevice, &swapChainDesc, &mSwapChain);
+  
+  /* Create the Render Target */
+  ID3D11Texture2D* backBuffer = NULL;
+  mSwapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&backBuffer);
+  device.d3DDevice->CreateRenderTargetView(backBuffer, NULL, &mRenderTargetView);
+  backBuffer->Release();
+
+  dxgiDevice->Release();
 }
 
 
@@ -69,35 +126,32 @@ Window::~Window(void)
 
 void Window::render(const WindowManager::Device& device)
 {
-  // todo: something like this:
+  device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
-  //g_pD3DDeviceContext->OMSetRenderTargets( 1, &p_Window->p_RenderTargetView, NULL );
+  // TODO: I don't think I need this in full screen... Figure out if I do or not...
+  D3D11_VIEWPORT viewport;
+  viewport.TopLeftX = 0;
+  viewport.TopLeftY = 0;
+  viewport.Width = mWidth;
+  viewport.Height = mHeight;
+  viewport.MinDepth = 0.0f;
+  viewport.MaxDepth = 1.0f;
+  device.d3DDeviceConext->RSSetViewports(1, &viewport);
 
-  //// Don't forget to adjust the viewport, in fullscreen it's not important...
-  //D3D11_VIEWPORT Viewport;
-  //Viewport.TopLeftX = 0;
-  //Viewport.TopLeftY = 0;
-  //Viewport.Width = p_Window->width;
-  //Viewport.Height = p_Window->height;
-  //Viewport.MinDepth = 0.0f;
-  //Viewport.MaxDepth = 1.0f;
-  //g_pD3DDeviceContext->RSSetViewports( 1, &Viewport );
-
-  //// TO DO: AMAZING STUFF PER WINDOW
-  //// Just clear the backbuffer
-  //float red = (double)rand() / (double)RAND_MAX;
-  //float green = (double)rand() / (double)RAND_MAX;
-  //float blue = (double)rand() / (double)RAND_MAX;
-  //float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
-  //if(i == 0)
-  //{
-  //  ClearColor[0] = 1.0;
-  //}
-  //else
-  //{
-  //  ClearColor[1] = 1.0;
-  //  ClearColor[2] = 1.0;
-  //}
-  //g_pD3DDeviceContext->ClearRenderTargetView( p_Window->p_RenderTargetView, ClearColor );
-  //p_Window->p_SwapChain->Present( 0, 0 );
+  // Just clear the backbuffer
+  float red = (double)rand() / (double)RAND_MAX;
+  float green = (double)rand() / (double)RAND_MAX;
+  float blue = (double)rand() / (double)RAND_MAX;
+  float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
+  if(windowNumber == 1)
+  {
+    ClearColor[0] = 1.0;
+  }
+  else
+  {
+    ClearColor[1] = 1.0;
+    ClearColor[2] = 1.0;
+  }
+  device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
+  mSwapChain->Present( 0, 0 );
 }
