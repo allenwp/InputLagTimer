@@ -30,9 +30,6 @@
     <ClInclude Include="InputLagTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tutorial.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Setup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,9 +45,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputLagTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tutorial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Setup.cpp">

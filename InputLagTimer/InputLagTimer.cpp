@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "InputLagTimer.h"
-#include "Tutorial.h"
 #include "Setup.h"
 #include "WindowManager.h"
 
@@ -43,11 +42,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
-  //init(hInst);
-  //GetAdapter();
-  //CreateWindowsForOutputs();
-  //CreateSwapChainsAndViews();
-
   Setup* setup = new Setup();
   windowManager = new WindowManager(setup->getSettings(), hInstance);
   delete setup;
@@ -79,7 +73,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
       }
       else
       {
-        //MultiRender();
         windowManager->render();
       }
     }
