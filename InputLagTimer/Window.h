@@ -1,4 +1,6 @@
 #pragma once
+#include "Setup.h"
+#include "WindowManager.h"
 
 class Window
 {
@@ -7,14 +9,13 @@ public:
   static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
   static TCHAR windowClassName[];
 
-  Window(HINSTANCE hInstance);
+  Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings);
   virtual ~Window(void);
 
-  unsigned int windowNumber;
+  void render(const WindowManager::Device& device);
 
 protected:
+  static int windowCount;
   TCHAR* windowName;
+  int windowNumber;
 };
-
-// TODO: Verify that this is being called when accessing elements from the multimap
-bool operator<(const Window& lhs, const Window& rhs);

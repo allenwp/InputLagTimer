@@ -1,16 +1,15 @@
 #include "stdafx.h"
 #include "WindowManager.h"
+#include "Window.h"
 
 WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstance)
 {
   Window::registerWindow(hInstance);
 
-  int deviceSortCount = 0;
   for(auto iter = settings.adapterSettings.begin(); iter != settings.adapterSettings.end(); ++iter)
   {
     Device device;
     ZeroMemory(&device, sizeof(Device));
-    device.sortValue = deviceSortCount;
 
     /* Any and all. I don't need anything more than a 9_1 */
     D3D_FEATURE_LEVEL featureLevels[] =
@@ -41,11 +40,12 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
       mReferencedObj.insert(device.d3DDeviceConext);
       for(auto outputIter = iter->outputSettings.begin(); outputIter != iter->outputSettings.end(); ++outputIter)
       {
-        Window* window = new Window(hInstance);
-        mWindowMap.insert(std::make_pair(device, window));
+        Window* window = new Window(hInstance, *outputIter);
+        DeviceWindowPair pair;
+        pair.device = device;
+        pair.window = window;
+        mWindows.push_back(pair);
       }
-
-      ++deviceSortCount;
     }
   }
 }
@@ -57,18 +57,16 @@ WindowManager::~WindowManager(void)
     (*iter)->Release();
   }
 
-  for(auto iter = mWindowMap.begin(); iter != mWindowMap.end(); ++iter)
+  for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
   {
-    delete iter->second;
+    delete iter->window;
   }
 }
 
 void WindowManager::render()
 {
-
-}
-
-bool operator <(const WindowManager::Device& lhs, const WindowManager::Device& rhs)
-{
-    return lhs.sortValue < rhs.sortValue;
+  for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
+  {
+    iter->window->render(iter->device);
+  }
 }

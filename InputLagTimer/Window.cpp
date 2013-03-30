@@ -2,6 +2,7 @@
 #include "Window.h"
 
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
+int Window::windowCount = 0;
 
 ATOM Window::registerWindow(HINSTANCE hInstance)
 {
@@ -46,10 +47,13 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return 0;
 }
 
-Window::Window(HINSTANCE hInstance)
+Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings)
 {
+  windowCount++;
+  windowNumber = windowCount;
+
   windowName = new TCHAR[256]; /* 256 is max window name length */
-  wsprintf(windowName, _T("Input Lag Timer - Output %i/%i"), 1, 1); // TODO
+  wsprintf(windowName, _T("Input Lag Timer - Output %i"), windowNumber); // TODO
 
   HWND hWnd = CreateWindow(windowClassName, windowName, WS_OVERLAPPEDWINDOW,
     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
@@ -63,7 +67,37 @@ Window::~Window(void)
   delete windowName;
 }
 
-bool operator<(const Window& lhs, const Window& rhs)
+void Window::render(const WindowManager::Device& device)
 {
-  return lhs.windowNumber < rhs.windowNumber;
+  // todo: something like this:
+
+  //g_pD3DDeviceContext->OMSetRenderTargets( 1, &p_Window->p_RenderTargetView, NULL );
+
+  //// Don't forget to adjust the viewport, in fullscreen it's not important...
+  //D3D11_VIEWPORT Viewport;
+  //Viewport.TopLeftX = 0;
+  //Viewport.TopLeftY = 0;
+  //Viewport.Width = p_Window->width;
+  //Viewport.Height = p_Window->height;
+  //Viewport.MinDepth = 0.0f;
+  //Viewport.MaxDepth = 1.0f;
+  //g_pD3DDeviceContext->RSSetViewports( 1, &Viewport );
+
+  //// TO DO: AMAZING STUFF PER WINDOW
+  //// Just clear the backbuffer
+  //float red = (double)rand() / (double)RAND_MAX;
+  //float green = (double)rand() / (double)RAND_MAX;
+  //float blue = (double)rand() / (double)RAND_MAX;
+  //float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
+  //if(i == 0)
+  //{
+  //  ClearColor[0] = 1.0;
+  //}
+  //else
+  //{
+  //  ClearColor[1] = 1.0;
+  //  ClearColor[2] = 1.0;
+  //}
+  //g_pD3DDeviceContext->ClearRenderTargetView( p_Window->p_RenderTargetView, ClearColor );
+  //p_Window->p_SwapChain->Present( 0, 0 );
 }
