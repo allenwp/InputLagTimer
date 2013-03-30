@@ -59,7 +59,6 @@ void Setup::analizeSystem()
       outputSettings.bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //outputSurfaceDescription->Format;
       outputSettings.bufferDesc.Scaling = DXGI_MODE_SCALING_CENTERED;
       outputSettings.bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-      // TODO: Don't hardcode the refresh rate: get it from the moinitor's current refresh rate
       outputSettings.bufferDesc.RefreshRate.Numerator = 0;
       outputSettings.bufferDesc.RefreshRate.Denominator = 1;
 
