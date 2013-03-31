@@ -20,6 +20,4 @@ protected:
   int windowNumber;
   IDXGISwapChain* mSwapChain;
   ID3D11RenderTargetView* mRenderTargetView;
-  FLOAT mWidth;
-  FLOAT mHeight;
 };

@@ -56,27 +56,17 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   /* Create the window */
   windowCount++;
   windowNumber = windowCount;
-  
-  DXGI_OUTPUT_DESC outputDesc;
-  outputSettings.output->GetDesc( &outputDesc );
-  int x = outputDesc.DesktopCoordinates.left;
-  int y = outputDesc.DesktopCoordinates.top;
-  // TODO: maybe width and height should be grabbed from somewhere else...
-  int width = outputDesc.DesktopCoordinates.right - x;
-  int height = outputDesc.DesktopCoordinates.bottom - y;
-  mWidth = width;
-  mHeight = height;
 
   windowName = new TCHAR[256]; /* 256 is max window name length */
-  wsprintf(windowName, _T("Input Lag Timer - Output %i"), windowNumber); // TODO
+  wsprintf(windowName, _T("Input Lag Timer - Output %i"), windowNumber);
 
   HWND hWnd = CreateWindow(windowClassName,
     windowName,
     WS_OVERLAPPEDWINDOW,
-    x,
-    y,
-    width,
-    height,
+    outputSettings.windowPositionLeft,
+    outputSettings.windowPositionTop,
+    outputSettings.bufferDesc.Width,
+    outputSettings.bufferDesc.Height,
     NULL,
     NULL,
     hInstance,
@@ -101,7 +91,7 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   swapChainDesc.SampleDesc.Count = 1;
   swapChainDesc.SampleDesc.Quality = 0;
   swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  swapChainDesc.BufferCount = 2;
+  swapChainDesc.BufferCount = 1;
   swapChainDesc.OutputWindow = hWnd;
   swapChainDesc.Windowed = TRUE;
   swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;

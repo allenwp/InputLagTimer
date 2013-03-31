@@ -9,6 +9,8 @@ public:
     IDXGIOutput* output;
     double maxTimerResolution;
     DXGI_MODE_DESC bufferDesc;
+    LONG windowPositionTop;
+    LONG windowPositionLeft;
   };
 
   struct AdapterSetting
@@ -21,6 +23,8 @@ public:
   {
     std::vector<AdapterSetting> adapterSettings;
   };
+
+  static void getClosestDisplayModeToCurrent(IDXGIOutput* output, DXGI_MODE_DESC* outCurrentDisplayMode);
 
   Setup(void);
   virtual ~Setup(void);

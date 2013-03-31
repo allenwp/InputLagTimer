@@ -1,6 +1,32 @@
 #include "stdafx.h"
 #include "Setup.h"
 
+void Setup::getClosestDisplayModeToCurrent(IDXGIOutput* output, DXGI_MODE_DESC* outCurrentDisplayMode)
+{
+  DXGI_OUTPUT_DESC outputDesc;
+  output->GetDesc(&outputDesc);
+  HMONITOR hMonitor = outputDesc.Monitor;
+  MONITORINFOEX monitorInfo;
+  monitorInfo.cbSize = sizeof(MONITORINFOEX);
+  GetMonitorInfo(hMonitor, &monitorInfo);
+  DEVMODE devMode;
+  devMode.dmSize = sizeof(DEVMODE);
+  devMode.dmDriverExtra = 0;
+  EnumDisplaySettings(monitorInfo.szDevice, ENUM_CURRENT_SETTINGS, &devMode);
+
+  DXGI_MODE_DESC current;
+  current.Width = devMode.dmPelsWidth;
+  current.Height = devMode.dmPelsHeight;
+  bool useDefaultRefreshRate = 1 == devMode.dmDisplayFrequency || 0 == devMode.dmDisplayFrequency;
+  current.RefreshRate.Numerator = useDefaultRefreshRate ? 0 : devMode.dmDisplayFrequency;
+  current.RefreshRate.Denominator = useDefaultRefreshRate ? 0 : 1;
+  current.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  current.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+  current.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+  output->FindClosestMatchingMode(&current, outCurrentDisplayMode, NULL);
+}
+
 Setup::Setup(void)
 {
   analizeSystem();
@@ -44,23 +70,14 @@ void Setup::analizeSystem()
       ZeroMemory(&outputSettings, sizeof(OutputSetting));
 
       outputSettings.output = output;
-
       outputSettings.maxTimerResolution = 0.0;
+      getClosestDisplayModeToCurrent(output, &outputSettings.bufferDesc);
 
-      // TODO: Is the output surface the right place to get this info???
-      //IDXGISurface* outputSurface = nullptr;
-      //HRESULT result = output->GetDisplaySurfaceData(outputSurface);
-      //DXGI_SURFACE_DESC* outputSurfaceDescription = nullptr;
-      //outputSurface->GetDesc(outputSurfaceDescription);
-
-      // TODO: figure out where to get these instead of hardcoding them...
-      outputSettings.bufferDesc.Width = 1920; //outputSurfaceDescription->Width;
-      outputSettings.bufferDesc.Height = 1080; //outputSurfaceDescription->Height;
-      outputSettings.bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //outputSurfaceDescription->Format;
-      outputSettings.bufferDesc.Scaling = DXGI_MODE_SCALING_CENTERED;
-      outputSettings.bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-      outputSettings.bufferDesc.RefreshRate.Numerator = 0;
-      outputSettings.bufferDesc.RefreshRate.Denominator = 1;
+      /* Find the desktop coordinates of the window: */
+      DXGI_OUTPUT_DESC outputDesc;
+      outputSettings.output->GetDesc(&outputDesc);
+      outputSettings.windowPositionLeft = outputDesc.DesktopCoordinates.left;
+      outputSettings.windowPositionTop = outputDesc.DesktopCoordinates.top;
 
       adapterSettings.outputSettings.push_back(outputSettings);
 
