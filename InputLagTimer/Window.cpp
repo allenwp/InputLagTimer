@@ -50,6 +50,9 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device)
 {
+  mDXGIOutput = outputSettings.output;
+  mDXGIOutput->AddRef();
+
   IDXGIFactory* factory = NULL;
   CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&factory));
   
@@ -111,7 +114,13 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
 
 Window::~Window(void)
 {
+  mDXGIOutput->Release();
   delete windowName;
+}
+
+void Window::setFullscreen(BOOL fullscreen)
+{
+  mSwapChain->SetFullscreenState(fullscreen, mDXGIOutput);
 }
 
 void Window::render(const WindowManager::Device& device)

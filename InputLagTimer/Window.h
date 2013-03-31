@@ -12,12 +12,15 @@ public:
   Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device);
   virtual ~Window(void);
 
+  void setFullscreen(BOOL fullscreen);
+
   void render(const WindowManager::Device& device);
 
 protected:
   static int windowCount;
   TCHAR* windowName;
   int windowNumber;
+  IDXGIOutput* mDXGIOutput;
   IDXGISwapChain* mSwapChain;
   ID3D11RenderTargetView* mRenderTargetView;
 };

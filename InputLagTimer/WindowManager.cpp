@@ -48,6 +48,13 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
       }
     }
   }
+
+  /* Go fullscreen after creating swap chains.
+     http://msdn.microsoft.com/en-us/library/windows/desktop/ee417025(v=vs.85).aspx#multiple_monitors */
+  for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
+  {
+    iter->window->setFullscreen(true);
+  }
 }
 
 WindowManager::~WindowManager(void)
