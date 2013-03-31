@@ -115,7 +115,7 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   swapChainDesc.OutputWindow = hWnd;
   swapChainDesc.Windowed = TRUE;
   swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
-  swapChainDesc.Flags = 0;
+  swapChainDesc.Flags = 0; // TODO: Should be DXGI_SWAP_CHAIN_FLAG_NONPREROTATED if I can get it working...
 
   factory->CreateSwapChain(dxgiDevice, &swapChainDesc, &mSwapChain);
   
@@ -141,6 +141,9 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
 
 Window::~Window(void)
 {
+  mSwapChain->SetFullscreenState(FALSE, NULL);
+  mSwapChain->Release();
+  mRenderTargetView->Release();
   mDXGIOutput->Release();
   delete windowName;
 }
