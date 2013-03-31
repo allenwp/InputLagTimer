@@ -3,6 +3,8 @@
 
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
 int Window::windowCount = 0;
+UINT Window::mMaxWidth = 0;
+UINT Window::mMaxHeight = 0;
 
 ATOM Window::registerWindow(HINSTANCE hInstance)
 {
@@ -46,6 +48,21 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
+}
+
+int Window::getWindowCount()
+{
+  return windowCount;
+}
+
+UINT Window::getMaxWidth()
+{
+  return mMaxWidth;
+}
+
+UINT Window::getMaxHeight()
+{
+  return mMaxHeight;
 }
 
 Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device)
@@ -109,6 +126,16 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   backBuffer->Release();
 
   dxgiDevice->Release();
+
+  /* Remember the max width and height for rendering. */
+  if(outputSettings.bufferDesc.Width > mMaxWidth)
+  {
+    mMaxWidth = outputSettings.bufferDesc.Width;
+  }
+  if(outputSettings.bufferDesc.Height > mMaxHeight)
+  {
+    mMaxHeight = outputSettings.bufferDesc.Height;
+  }
 }
 
 

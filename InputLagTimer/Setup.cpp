@@ -25,6 +25,24 @@ void Setup::getClosestDisplayModeToCurrent(IDXGIOutput* output, DXGI_MODE_DESC* 
   current.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
   output->FindClosestMatchingMode(&current, outCurrentDisplayMode, NULL);
+  
+  /* Some temporary test code to see if the result of FindClosestMatchingMode was what I would choose */
+  //UINT num = 0;
+  //DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  //UINT flags         = DXGI_ENUM_MODES_INTERLACED | DXGI_ENUM_MODES_SCALING;
+
+  //output->GetDisplayModeList( format, flags, &num, 0);
+  //DXGI_MODE_DESC * pDescs = new DXGI_MODE_DESC[num];
+  //output->GetDisplayModeList( format, flags, &num, pDescs);
+  //
+  //for(int i = 0; i < num; i++)
+  //{
+  //  if(pDescs[i].Width == 1920 && pDescs[i].Height == 1080)
+  //  {
+  //    DXGI_MODE_DESC something = pDescs[i];
+  //    int somethineg = 0;
+  //  }
+  //}
 }
 
 Setup::Setup(void)
