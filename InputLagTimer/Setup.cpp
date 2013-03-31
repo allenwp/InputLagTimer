@@ -21,7 +21,7 @@ void Setup::getClosestDisplayModeToCurrent(IDXGIOutput* output, DXGI_MODE_DESC* 
   current.RefreshRate.Numerator = useDefaultRefreshRate ? 0 : devMode.dmDisplayFrequency;
   current.RefreshRate.Denominator = useDefaultRefreshRate ? 0 : 1;
   current.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  current.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+  current.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
   current.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
   output->FindClosestMatchingMode(&current, outCurrentDisplayMode, NULL);
