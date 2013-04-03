@@ -192,5 +192,8 @@ void Window::render(const WindowManager::Device& device)
     ClearColor[2] = 1.0;
   }
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
+  
+  mModel->update();
+  
   mSwapChain->Present( 0, 0 );
 }
