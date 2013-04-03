@@ -55,6 +55,13 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
   {
     iter->window->setFullscreen(true);
   }
+
+  LARGE_INTEGER startingCount;
+  QueryPerformanceCounter(&startingCount);
+  for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
+  {
+    iter->window->initializeModel(startingCount);
+  }
 }
 
 WindowManager::~WindowManager(void)

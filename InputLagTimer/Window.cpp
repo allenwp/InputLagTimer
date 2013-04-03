@@ -66,6 +66,7 @@ UINT Window::getMaxHeight()
 }
 
 Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device)
+  :mModel(nullptr)
 {
   mDXGIOutput = outputSettings.output;
   mDXGIOutput->AddRef();
@@ -141,6 +142,10 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
 
 Window::~Window(void)
 {
+  if(mModel)
+  {
+    delete mModel;
+  }
   mSwapChain->SetFullscreenState(FALSE, NULL);
   mSwapChain->Release();
   mRenderTargetView->Release();
@@ -151,6 +156,11 @@ Window::~Window(void)
 void Window::setFullscreen(BOOL fullscreen)
 {
   mSwapChain->SetFullscreenState(fullscreen, mDXGIOutput);
+}
+
+void Window::initializeModel(const LARGE_INTEGER& startingCount)
+{
+  mModel = new Model(startingCount);
 }
 
 void Window::render(const WindowManager::Device& device)

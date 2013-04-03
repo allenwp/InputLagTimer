@@ -1,6 +1,7 @@
 #pragma once
 #include "Setup.h"
 #include "WindowManager.h"
+#include "Model.h"
 
 class Window
 {
@@ -15,7 +16,7 @@ public:
   virtual ~Window(void);
 
   void setFullscreen(BOOL fullscreen);
-
+  void initializeModel(const LARGE_INTEGER& startingCount);
   void render(const WindowManager::Device& device);
 
 protected:
@@ -28,4 +29,5 @@ protected:
   IDXGIOutput* mDXGIOutput;
   IDXGISwapChain* mSwapChain;
   ID3D11RenderTargetView* mRenderTargetView;
+  Model* mModel;
 };
