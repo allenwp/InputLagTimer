@@ -138,6 +138,59 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   {
     mMaxHeight = outputSettings.bufferDesc.Height;
   }
+
+  /* DirectX Toolkit setup */
+  g_States.reset( new DirectX::CommonStates( device.d3DDevice ) );
+  g_Sprites.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
+  g_FXFactory.reset( new DirectX::EffectFactory( device.d3DDevice ) );
+
+  g_BatchEffect.reset( new DirectX::BasicEffect( device.d3DDevice ) );
+  g_BatchEffect->SetVertexColorEnabled(true);
+
+  {
+    void const* shaderByteCode;
+    size_t byteCodeLength;
+
+    g_BatchEffect->GetVertexShaderBytecode( &shaderByteCode, &byteCodeLength );
+
+    hr = device.d3DDevice->CreateInputLayout( VertexPositionColor::InputElements,
+      VertexPositionColor::InputElementCount,
+      shaderByteCode, byteCodeLength,
+      &g_pBatchInputLayout );
+    if( FAILED( hr ) )
+      return hr;
+  }
+
+  g_Font.reset( new SpriteFont( device.d3DDevice, L"italic.spritefont" ) );
+
+  g_Shape = GeometricPrimitive::CreateTeapot( device.d3DDeviceConext, 4.f, 8, false );
+
+  g_Model = Model::CreateFromSDKMESH( device.d3DDevice, L"tiny.sdkmesh", *g_FXFactory, true );
+
+  // Load the Texture
+  hr = CreateDDSTextureFromFile( device.d3DDevice, L"seafloor.dds", nullptr, &g_pTextureRV1 );
+  if( FAILED( hr ) )
+    return hr;
+
+  hr = CreateDDSTextureFromFile( device.d3DDevice, L"windowslogo.dds", nullptr, &g_pTextureRV2 );
+  if( FAILED( hr ) )
+    return hr;
+
+  // Initialize the world matrices
+  g_World = XMMatrixIdentity();
+
+  // Initialize the view matrix
+  XMVECTOR Eye = XMVectorSet( 0.0f, 3.0f, -6.0f, 0.0f );
+  XMVECTOR At = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
+  XMVECTOR Up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
+  g_View = XMMatrixLookAtLH( Eye, At, Up );
+
+  g_BatchEffect->SetView( g_View );
+
+  // Initialize the projection matrix
+  g_Projection = XMMatrixPerspectiveFovLH( XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f );
+
+  g_BatchEffect->SetProjection( g_Projection );
 }
 
 
@@ -207,4 +260,8 @@ void Window::renderModel(Model* model)
   assert(timerValue.high < 1000 && timerValue.low < 100); /* Current design of display expects to always have less than a second */
   wchar_t timerString[7];
   swprintf_s(timerString, L"%03d.%02d", timerValue);
+
+  g_Sprites->Begin( DirectX::SpriteSortMode_Deferred );
+  g_Font->DrawString( g_Sprites.get(), L"DirectXTK Simple Sample", DirectX::XMFLOAT2( 100, 10 ), DirectX::Colors::Yellow );
+  g_Sprites->End();
 }

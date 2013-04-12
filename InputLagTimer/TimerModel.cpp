@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Model.h"
+#include "TimerModel.h"
 
 
 Model::Model(LARGE_INTEGER startingCount)

@@ -39,7 +39,7 @@
     <ClInclude Include="Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="TimerModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,7 +59,7 @@
     <ClCompile Include="Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="TimerModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -73,6 +73,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="InputLagTimer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\arabtype.spritefont">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
