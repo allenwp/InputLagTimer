@@ -20,6 +20,8 @@ public:
   void render(const WindowManager::Device& device);
 
 protected:
+  void renderModel(Model* model);
+
   static TCHAR windowClassName[];
   static int windowCount;
   static UINT mMaxWidth;

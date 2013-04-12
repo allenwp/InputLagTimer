@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Window.h"
+#include <assert.h>
 
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
 int Window::windowCount = 0;
@@ -194,6 +195,16 @@ void Window::render(const WindowManager::Device& device)
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
   mModel->update();
+
+  renderModel(mModel);
   
   mSwapChain->Present( 0, 0 );
+}
+
+void Window::renderModel(Model* model)
+{
+  Model::TimerValue timerValue = model->getTimerValue();
+  assert(timerValue.high < 1000 && timerValue.low < 100); /* Current design of display expects to always have less than a second */
+  wchar_t timerString[7];
+  swprintf_s(timerString, L"%03d.%02d", timerValue);
 }

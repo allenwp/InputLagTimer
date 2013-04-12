@@ -12,6 +12,12 @@ Model::~Model(void)
 {
 }
 
+union uFloat
+{
+  float value;
+  unsigned __int32 iValue;
+};
+
 void Model::update()
 {
   LARGE_INTEGER performanceFrequency;
@@ -36,7 +42,9 @@ void Model::update()
 
   ULONGLONG fullTimerValue = secondsSinceStart * 100000.0 + 0.5; /* Add 0.5 to round */
   ULONGLONG trimmedHigh = (fullTimerValue / 100000) * 100000;
-  unsigned int timerValue = fullTimerValue - trimmedHigh;
+  unsigned int iTimerValue = fullTimerValue - trimmedHigh;
+  mTimerValue.high = iTimerValue / 100; /* Convert to ms */
+  mTimerValue.low = iTimerValue - (mTimerValue.high * 100); /* Sub-milliseconds */
 
   mLastCount = currentCount;
 }
@@ -44,4 +52,9 @@ void Model::update()
 void Model::reportError(Model::ErrorType error, bool isPermanent)
 {
   // TODO
+}
+
+Model::TimerValue Model::getTimerValue() const
+{
+  return mTimerValue;
 }
