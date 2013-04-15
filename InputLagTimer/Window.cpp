@@ -127,6 +127,16 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   device.d3DDevice->CreateRenderTargetView(backBuffer, NULL, &mRenderTargetView);
   backBuffer->Release();
 
+  /* Setup the viewport */
+  D3D11_VIEWPORT vp;
+  vp.Width = outputSettings.bufferDesc.Width;
+  vp.Height = outputSettings.bufferDesc.Height;
+  vp.MinDepth = 0.0f;
+  vp.MaxDepth = 1.0f;
+  vp.TopLeftX = 0;
+  vp.TopLeftY = 0;
+  device.d3DDeviceConext->RSSetViewports( 1, &vp );
+
   dxgiDevice->Release();
 
   /* Remember the max width and height for rendering. */
@@ -140,57 +150,12 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   }
 
   /* DirectX Toolkit setup */
-  g_States.reset( new DirectX::CommonStates( device.d3DDevice ) );
-  g_Sprites.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
-  g_FXFactory.reset( new DirectX::EffectFactory( device.d3DDevice ) );
+  mSpriteBatch.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
 
-  g_BatchEffect.reset( new DirectX::BasicEffect( device.d3DDevice ) );
-  g_BatchEffect->SetVertexColorEnabled(true);
+  mSpriteFont.reset( new DirectX::SpriteFont( device.d3DDevice, L"res/arabtype.spritefont" ) );
 
-  {
-    void const* shaderByteCode;
-    size_t byteCodeLength;
-
-    g_BatchEffect->GetVertexShaderBytecode( &shaderByteCode, &byteCodeLength );
-
-    hr = device.d3DDevice->CreateInputLayout( VertexPositionColor::InputElements,
-      VertexPositionColor::InputElementCount,
-      shaderByteCode, byteCodeLength,
-      &g_pBatchInputLayout );
-    if( FAILED( hr ) )
-      return hr;
-  }
-
-  g_Font.reset( new SpriteFont( device.d3DDevice, L"italic.spritefont" ) );
-
-  g_Shape = GeometricPrimitive::CreateTeapot( device.d3DDeviceConext, 4.f, 8, false );
-
-  g_Model = Model::CreateFromSDKMESH( device.d3DDevice, L"tiny.sdkmesh", *g_FXFactory, true );
-
-  // Load the Texture
-  hr = CreateDDSTextureFromFile( device.d3DDevice, L"seafloor.dds", nullptr, &g_pTextureRV1 );
-  if( FAILED( hr ) )
-    return hr;
-
-  hr = CreateDDSTextureFromFile( device.d3DDevice, L"windowslogo.dds", nullptr, &g_pTextureRV2 );
-  if( FAILED( hr ) )
-    return hr;
-
-  // Initialize the world matrices
-  g_World = XMMatrixIdentity();
-
-  // Initialize the view matrix
-  XMVECTOR Eye = XMVectorSet( 0.0f, 3.0f, -6.0f, 0.0f );
-  XMVECTOR At = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-  XMVECTOR Up = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-  g_View = XMMatrixLookAtLH( Eye, At, Up );
-
-  g_BatchEffect->SetView( g_View );
-
-  // Initialize the projection matrix
-  g_Projection = XMMatrixPerspectiveFovLH( XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f );
-
-  g_BatchEffect->SetProjection( g_Projection );
+  /* Maybe I want this in the future? Texture loading: */
+  //CreateDDSTextureFromFile( device.d3DDevice, L"seafloor.dds", nullptr, &g_pTextureRV1 );
 }
 
 
@@ -232,19 +197,20 @@ void Window::render(const WindowManager::Device& device)
   //device.d3DDeviceConext->RSSetViewports(1, &viewport);
 
   // Just clear the backbuffer
-  float red = (double)rand() / (double)RAND_MAX;
-  float green = (double)rand() / (double)RAND_MAX;
-  float blue = (double)rand() / (double)RAND_MAX;
-  float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
-  if(windowNumber == 1)
-  {
-    ClearColor[0] = 1.0;
-  }
-  else
-  {
-    ClearColor[1] = 1.0;
-    ClearColor[2] = 1.0;
-  }
+  //float red = (double)rand() / (double)RAND_MAX;
+  //float green = (double)rand() / (double)RAND_MAX;
+  //float blue = (double)rand() / (double)RAND_MAX;
+  //float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
+  //if(windowNumber == 1)
+  //{
+  //  ClearColor[0] = 1.0;
+  //}
+  //else
+  //{
+  //  ClearColor[1] = 1.0;
+  //  ClearColor[2] = 1.0;
+  //}
+  float ClearColor[4] = { 0.5, 0.5, 0.5, 1.0f };
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
   mModel->update();
@@ -261,7 +227,7 @@ void Window::renderModel(Model* model)
   wchar_t timerString[7];
   swprintf_s(timerString, L"%03d.%02d", timerValue);
 
-  g_Sprites->Begin( DirectX::SpriteSortMode_Deferred );
-  g_Font->DrawString( g_Sprites.get(), L"DirectXTK Simple Sample", DirectX::XMFLOAT2( 100, 10 ), DirectX::Colors::Yellow );
-  g_Sprites->End();
+  mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
+  mSpriteFont->DrawString( mSpriteBatch.get(), L"DirectXTK Simple Sample", DirectX::XMFLOAT2( 100, 10 ), DirectX::Colors::Yellow );
+  mSpriteBatch->End();
 }

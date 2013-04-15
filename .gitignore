@@ -9,3 +9,8 @@
 
 /ipch
 /InputLagTimer/*.user
+/DirectXTK/Bin
+/DirectXTK/*.sdf
+/DirectXTK/*.suo
+/DirectXTK/MakeSpriteFont/bin
+/DirectXTK/MakeSpriteFont/obj
