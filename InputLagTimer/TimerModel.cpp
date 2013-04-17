@@ -58,3 +58,8 @@ Model::TimerValue Model::getTimerValue() const
 {
   return mTimerValue;
 }
+
+int Model::getColumn() const
+{
+  return 0;
+}

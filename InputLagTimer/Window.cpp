@@ -2,6 +2,10 @@
 #include "Window.h"
 #include <assert.h>
 
+#define TIMER_VALUE_PADDING 10.0
+#define TIMER_VALUE_COLOUR DirectX::Colors::Yellow
+#define COLUMN_SEPARATOR_WIDTH 15.0
+
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
 int Window::windowCount = 0;
 UINT Window::mMaxWidth = 0;
@@ -222,12 +226,47 @@ void Window::render(const WindowManager::Device& device)
 
 void Window::renderModel(Model* model)
 {
+  /* Generate strings */
   Model::TimerValue timerValue = model->getTimerValue();
   assert(timerValue.high < 1000 && timerValue.low < 100); /* Current design of display expects to always have less than a second */
   wchar_t timerString[7];
   swprintf_s(timerString, L"%03d.%02d", timerValue);
 
-  mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
-  mSpriteFont->DrawString( mSpriteBatch.get(), L"DirectXTK Simple Sample", DirectX::XMFLOAT2( 100, 10 ), DirectX::Colors::Yellow );
+  /* Render sprites */
+  // TODO: Determine which of deferred or immediate gives the least latency.
+  mSpriteBatch->Begin( DirectX::SpriteSortMode_Immediate );
+
+  int x = TIMER_VALUE_PADDING;
+  while(x < mMaxWidth)
+  {
+    int column = model->getColumn();
+    x = drawColumn(timerString, x, column, *mSpriteFont);
+  }
+
   mSpriteBatch->End();
+}
+
+int Window::drawColumn(const wchar_t* timerString, int x, int column, const DirectX::SpriteFont& font)
+{
+  int y = TIMER_VALUE_PADDING;
+  DirectX::XMVECTOR textSize = font.MeasureString(L"888.88");
+  int textWidth = ceilf(textSize.m128_f32[0]); // TODO: figure out how to access stuff via .x property. :S
+  int lineHeight = ceilf(textSize.m128_f32[1]);
+
+  /* Draw header */
+  mSpriteFont->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
+  y += lineHeight + TIMER_VALUE_PADDING;
+  
+  /* Draw Timer Values */
+  int textX = x + (textWidth * column);
+  while(y < getMaxHeight())
+  {
+    mSpriteFont->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), TIMER_VALUE_COLOUR);
+    y += lineHeight + TIMER_VALUE_PADDING;
+  }
+  
+  /* Draw Column Separator */
+  int separatorX = x + (textWidth * 3) + COLUMN_SEPARATOR_WIDTH;
+
+  return separatorX;
 }
