@@ -2,6 +2,10 @@
 #include "Window.h"
 #include <assert.h>
 
+#define TIMER_VALUE_PADDING 10.0
+#define TIMER_VALUE_COLOUR DirectX::Colors::Yellow
+#define COLUMN_SEPARATOR_WIDTH 15.0
+
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
 int Window::windowCount = 0;
 UINT Window::mMaxWidth = 0;
@@ -186,16 +190,6 @@ void Window::render(const WindowManager::Device& device)
 {
   device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
-  // TODO: I don't think I need this in full screen... Figure out if I do or not...
-  //D3D11_VIEWPORT viewport;
-  //viewport.TopLeftX = 0;
-  //viewport.TopLeftY = 0;
-  //viewport.Width = mWidth;
-  //viewport.Height = mHeight;
-  //viewport.MinDepth = 0.0f;
-  //viewport.MaxDepth = 1.0f;
-  //device.d3DDeviceConext->RSSetViewports(1, &viewport);
-
   // Just clear the backbuffer
   //float red = (double)rand() / (double)RAND_MAX;
   //float green = (double)rand() / (double)RAND_MAX;
@@ -214,20 +208,54 @@ void Window::render(const WindowManager::Device& device)
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
   mModel->update();
-
   renderModel(mModel);
-  
   mSwapChain->Present( 0, 0 );
+  mModel->renderComplete();
 }
 
 void Window::renderModel(Model* model)
 {
+  /* Generate strings */
   Model::TimerValue timerValue = model->getTimerValue();
   assert(timerValue.high < 1000 && timerValue.low < 100); /* Current design of display expects to always have less than a second */
   wchar_t timerString[7];
   swprintf_s(timerString, L"%03d.%02d", timerValue);
 
+  /* Render sprites */
+  // TODO: Determine which of deferred or immediate gives the least latency.
   mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
-  mSpriteFont->DrawString( mSpriteBatch.get(), L"DirectXTK Simple Sample", DirectX::XMFLOAT2( 100, 10 ), DirectX::Colors::Yellow );
+
+  int x = TIMER_VALUE_PADDING;
+  while(x < mMaxWidth)
+  {
+    int column = model->getColumn();
+    x = drawColumn(timerString, x, column, *mSpriteFont);
+  }
+
   mSpriteBatch->End();
+}
+
+int Window::drawColumn(const wchar_t* timerString, int x, int column, const DirectX::SpriteFont& font)
+{
+  int y = TIMER_VALUE_PADDING;
+  DirectX::XMVECTOR textSize = font.MeasureString(L"888.88");
+  int textWidth = ceilf(textSize.m128_f32[0]); // TODO: figure out how to access stuff via .x property. :S
+  int lineHeight = ceilf(textSize.m128_f32[1]);
+
+  /* Draw header */
+  mSpriteFont->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
+  y += lineHeight + TIMER_VALUE_PADDING;
+  
+  /* Draw Timer Values */
+  int textX = x + (textWidth * column);
+  while(y < getMaxHeight())
+  {
+    mSpriteFont->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), TIMER_VALUE_COLOUR);
+    y += lineHeight + TIMER_VALUE_PADDING;
+  }
+  
+  /* Draw Column Separator */
+  int separatorX = x + (textWidth * 3) + COLUMN_SEPARATOR_WIDTH;
+
+  return separatorX;
 }

@@ -26,6 +26,11 @@ public:
 protected:
   void renderModel(Model* model);
 
+  /**
+   * @return the new x coordinate of the right of the column that was just drawn
+   */
+  int Window::drawColumn(const wchar_t* timerString, int x, int column, const DirectX::SpriteFont& font);
+
   static TCHAR windowClassName[];
   static int windowCount;
   static UINT mMaxWidth;

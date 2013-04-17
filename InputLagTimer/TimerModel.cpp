@@ -49,6 +49,20 @@ void Model::update()
   mLastCount = currentCount;
 }
 
+void Model::renderComplete()
+{
+  LARGE_INTEGER currentCount;
+  QueryPerformanceCounter(&currentCount);
+
+  LARGE_INTEGER renderCount;
+  renderCount.QuadPart = currentCount.QuadPart - mLastCount.QuadPart;
+
+  LARGE_INTEGER performanceFrequency;
+  QueryPerformanceFrequency(&performanceFrequency);
+
+  mLastRenderTime = ((double)renderCount.QuadPart) / performanceFrequency.QuadPart;
+}
+
 void Model::reportError(Model::ErrorType error, bool isPermanent)
 {
   // TODO
@@ -57,4 +71,14 @@ void Model::reportError(Model::ErrorType error, bool isPermanent)
 Model::TimerValue Model::getTimerValue() const
 {
   return mTimerValue;
+}
+
+int Model::getColumn() const
+{
+  return 0;
+}
+
+double Model::getLastRenderTime() const
+{
+  return mLastRenderTime;
 }
