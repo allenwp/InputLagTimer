@@ -218,10 +218,9 @@ void Window::render(const WindowManager::Device& device)
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
   mModel->update();
-
   renderModel(mModel);
-  
   mSwapChain->Present( 0, 0 );
+  mModel->renderComplete();
 }
 
 void Window::renderModel(Model* model)
@@ -234,7 +233,7 @@ void Window::renderModel(Model* model)
 
   /* Render sprites */
   // TODO: Determine which of deferred or immediate gives the least latency.
-  mSpriteBatch->Begin( DirectX::SpriteSortMode_Immediate );
+  mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
 
   int x = TIMER_VALUE_PADDING;
   while(x < mMaxWidth)

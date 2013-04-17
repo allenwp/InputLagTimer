@@ -18,6 +18,12 @@ public:
   virtual ~Model(void);
 
   void update();
+  /**
+   * Should be called directly after the buffer is flipped.
+   * This function will calculate the render time for the last frame
+   */
+  void renderComplete();
+
   void reportError(ErrorType error, bool isPermanent);
 
   /**
@@ -32,9 +38,15 @@ public:
    */
   int getColumn() const;
 
+  /**
+   * @return The last render time in seconds.
+   */
+  double getLastRenderTime() const;
+
 protected:
   LARGE_INTEGER mStartingCount;
   LARGE_INTEGER mLastCount;
   TimerValue mTimerValue;
+  double mLastRenderTime;
 };
 
