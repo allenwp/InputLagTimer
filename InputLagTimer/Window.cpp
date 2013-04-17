@@ -190,16 +190,6 @@ void Window::render(const WindowManager::Device& device)
 {
   device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
-  // TODO: I don't think I need this in full screen... Figure out if I do or not...
-  //D3D11_VIEWPORT viewport;
-  //viewport.TopLeftX = 0;
-  //viewport.TopLeftY = 0;
-  //viewport.Width = mWidth;
-  //viewport.Height = mHeight;
-  //viewport.MinDepth = 0.0f;
-  //viewport.MaxDepth = 1.0f;
-  //device.d3DDeviceConext->RSSetViewports(1, &viewport);
-
   // Just clear the backbuffer
   //float red = (double)rand() / (double)RAND_MAX;
   //float green = (double)rand() / (double)RAND_MAX;
