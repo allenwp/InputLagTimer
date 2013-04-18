@@ -14,7 +14,7 @@ public:
     ERROR_RENDER_TIME_VARIANCE_TOO_HIGH
   };
 
-  Model(LARGE_INTEGER startingCount);
+  Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain);
   virtual ~Model(void);
 
   void update();
@@ -48,5 +48,9 @@ protected:
   LARGE_INTEGER mLastCount;
   TimerValue mTimerValue;
   double mLastRenderTime;
+  LARGE_INTEGER mCountsPerRefresh;
+  LARGE_INTEGER mCountsSinceRefresh;
+  DXGI_SWAP_CHAIN_DESC mSwapChainDesc;
+  int mColumn;
 };
 

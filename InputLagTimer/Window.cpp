@@ -124,7 +124,12 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   swapChainDesc.Flags = 0; // TODO: Should be DXGI_SWAP_CHAIN_FLAG_NONPREROTATED if I can get it working...
 
   factory->CreateSwapChain(dxgiDevice, &swapChainDesc, &mSwapChain);
-  
+
+  /* This shouldn't vary, but just in case, re-read the swap chain description
+     so that we know exactly what it ended up being. */
+  ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+  mSwapChain->GetDesc(&swapChainDesc);
+
   /* Create the Render Target */
   ID3D11Texture2D* backBuffer = NULL;
   mSwapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&backBuffer);
@@ -133,8 +138,8 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
 
   /* Setup the viewport */
   D3D11_VIEWPORT vp;
-  vp.Width = outputSettings.bufferDesc.Width;
-  vp.Height = outputSettings.bufferDesc.Height;
+  vp.Width = swapChainDesc.BufferDesc.Width;
+  vp.Height = swapChainDesc.BufferDesc.Height;
   vp.MinDepth = 0.0f;
   vp.MaxDepth = 1.0f;
   vp.TopLeftX = 0;
@@ -144,13 +149,13 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   dxgiDevice->Release();
 
   /* Remember the max width and height for rendering. */
-  if(outputSettings.bufferDesc.Width > mMaxWidth)
+  if(swapChainDesc.BufferDesc.Width > mMaxWidth)
   {
-    mMaxWidth = outputSettings.bufferDesc.Width;
+    mMaxWidth = swapChainDesc.BufferDesc.Width;
   }
-  if(outputSettings.bufferDesc.Height > mMaxHeight)
+  if(swapChainDesc.BufferDesc.Height > mMaxHeight)
   {
-    mMaxHeight = outputSettings.bufferDesc.Height;
+    mMaxHeight = swapChainDesc.BufferDesc.Height;
   }
 
   /* DirectX Toolkit setup */
@@ -181,9 +186,9 @@ void Window::setFullscreen(BOOL fullscreen)
   mSwapChain->SetFullscreenState(fullscreen, mDXGIOutput);
 }
 
-void Window::initializeModel(const LARGE_INTEGER& startingCount)
+void Window::initializeModel(const LARGE_INTEGER& startingCount, IDXGISwapChain* swapChain)
 {
-  mModel = new Model(startingCount);
+  mModel = new Model(startingCount, swapChain);
 }
 
 void Window::render(const WindowManager::Device& device)
@@ -258,4 +263,9 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, const Dire
   int separatorX = x + (textWidth * 3) + COLUMN_SEPARATOR_WIDTH;
 
   return separatorX;
+}
+
+IDXGISwapChain* Window::getSwapChain()
+{
+  return mSwapChain;
 }

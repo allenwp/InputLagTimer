@@ -60,7 +60,7 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
   QueryPerformanceCounter(&startingCount);
   for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
   {
-    iter->window->initializeModel(startingCount);
+    iter->window->initializeModel(startingCount, iter->window->getSwapChain());
   }
 }
 
