@@ -2,9 +2,21 @@
 #include "TimerModel.h"
 
 
-Model::Model(LARGE_INTEGER startingCount)
+Model::Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain)
+  :mStartingCount(startingCount),
+  mLastCount(startingCount),
+  mLastRenderTime(0.0),
+  mColumn(0)
 {
-  mStartingCount = startingCount;
+  mCountsSinceRefresh.QuadPart = 0;
+
+  ZeroMemory(&mSwapChainDesc, sizeof(mSwapChainDesc));
+  swapChain->GetDesc(&mSwapChainDesc);
+
+  /* Refresh rate calculations */
+  LARGE_INTEGER performanceFrequency;
+  QueryPerformanceFrequency(&performanceFrequency);
+  mCountsPerRefresh.QuadPart = performanceFrequency.QuadPart * mSwapChainDesc.BufferDesc.RefreshRate.Denominator / mSwapChainDesc.BufferDesc.RefreshRate.Numerator;
 }
 
 
@@ -35,16 +47,29 @@ void Model::update()
     reportError(ERROR_COUNTER_OVERFLOW, true);
   }
 
-  LARGE_INTEGER countSinceStart;
+  LARGE_INTEGER countSinceStart, countSinceLast;
   countSinceStart.QuadPart = currentCount.QuadPart - mStartingCount.QuadPart;
+  countSinceLast.QuadPart = currentCount.QuadPart - mLastCount.QuadPart;
 
+  /* Timer Value */
   double secondsSinceStart = ((double)countSinceStart.QuadPart) / performanceFrequency.QuadPart;
-
   ULONGLONG fullTimerValue = secondsSinceStart * 100000.0 + 0.5; /* Add 0.5 to round */
   ULONGLONG trimmedHigh = (fullTimerValue / 100000) * 100000;
   unsigned int iTimerValue = fullTimerValue - trimmedHigh;
   mTimerValue.high = iTimerValue / 100; /* Convert to ms */
   mTimerValue.low = iTimerValue - (mTimerValue.high * 100); /* Sub-milliseconds */
+
+  /* Column & once-per-refresh stuff */
+  mCountsSinceRefresh.HighPart += countSinceLast.QuadPart;
+  if(mCountsSinceRefresh.QuadPart >= mCountsPerRefresh.QuadPart)
+  {
+    mCountsSinceRefresh.QuadPart -= mCountsPerRefresh.QuadPart;
+    mColumn++;
+    if(mColumn > 2)
+    {
+      mColumn = 0;
+    }
+  }
 
   mLastCount = currentCount;
 }
@@ -75,7 +100,7 @@ Model::TimerValue Model::getTimerValue() const
 
 int Model::getColumn() const
 {
-  return 0;
+  return mColumn;
 }
 
 double Model::getLastRenderTime() const

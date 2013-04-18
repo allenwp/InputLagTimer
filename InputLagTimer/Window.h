@@ -20,8 +20,10 @@ public:
   virtual ~Window(void);
 
   void setFullscreen(BOOL fullscreen);
-  void initializeModel(const LARGE_INTEGER& startingCount);
+  void initializeModel(const LARGE_INTEGER& startingCount, IDXGISwapChain* swapChain);
   void render(const WindowManager::Device& device);
+
+  IDXGISwapChain* getSwapChain();
 
 protected:
   void renderModel(Model* model);
