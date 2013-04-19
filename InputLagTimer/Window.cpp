@@ -136,16 +136,6 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   device.d3DDevice->CreateRenderTargetView(backBuffer, NULL, &mRenderTargetView);
   backBuffer->Release();
 
-  /* Setup the viewport */
-  D3D11_VIEWPORT vp;
-  vp.Width = swapChainDesc.BufferDesc.Width;
-  vp.Height = swapChainDesc.BufferDesc.Height;
-  vp.MinDepth = 0.0f;
-  vp.MaxDepth = 1.0f;
-  vp.TopLeftX = 0;
-  vp.TopLeftY = 0;
-  device.d3DDeviceConext->RSSetViewports( 1, &vp );
-
   dxgiDevice->Release();
 
   /* Remember the max width and height for rendering. */

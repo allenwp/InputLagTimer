@@ -60,7 +60,7 @@ void Model::update()
   mTimerValue.low = iTimerValue - (mTimerValue.high * 100); /* Sub-milliseconds */
 
   /* Column & once-per-refresh stuff */
-  mCountsSinceRefresh.HighPart += countSinceLast.QuadPart;
+  mCountsSinceRefresh.QuadPart += countSinceLast.QuadPart;
   if(mCountsSinceRefresh.QuadPart >= mCountsPerRefresh.QuadPart)
   {
     mCountsSinceRefresh.QuadPart -= mCountsPerRefresh.QuadPart;

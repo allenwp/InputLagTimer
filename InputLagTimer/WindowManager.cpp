@@ -38,6 +38,11 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
     {
       mReferencedObj.insert(device.d3DDevice);
       mReferencedObj.insert(device.d3DDeviceConext);
+      int numberOfViewports = iter->outputSettings.size();
+      D3D11_VIEWPORT* viewports = new D3D11_VIEWPORT[numberOfViewports];
+      int sizeOfViewports = sizeof(viewports) * numberOfViewports;
+      ZeroMemory(viewports, sizeOfViewports);
+      int i = 0;
       for(auto outputIter = iter->outputSettings.begin(); outputIter != iter->outputSettings.end(); ++outputIter)
       {
         Window* window = new Window(hInstance, *outputIter, device);
@@ -45,7 +50,23 @@ WindowManager::WindowManager(const Setup::Settings& settings, HINSTANCE hInstanc
         pair.device = device;
         pair.window = window;
         mWindows.push_back(pair);
+
+        /* Create the viewport for this window, needed for DXTK font rendering */
+        DXGI_SWAP_CHAIN_DESC swapChainDesc;
+        ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+        window->getSwapChain()->GetDesc(&swapChainDesc);
+        viewports[i].Width = swapChainDesc.BufferDesc.Width;
+        viewports[i].Height = swapChainDesc.BufferDesc.Height;
+        viewports[i].MinDepth = 0.0f;
+        viewports[i].MaxDepth = 1.0f;
+        viewports[i].TopLeftX = 0;
+        viewports[i].TopLeftY = 0;
+
+        i++;
       }
+      /* Setup the viewport */
+      device.d3DDeviceConext->RSSetViewports( numberOfViewports, viewports );
+      delete viewports;
     }
   }
 
