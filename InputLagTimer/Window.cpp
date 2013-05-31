@@ -151,7 +151,7 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   /* DirectX Toolkit setup */
   mSpriteBatch.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
 
-  mSpriteFont.reset( new DirectX::SpriteFont( device.d3DDevice, L"res/arabtype.spritefont" ) );
+  mSpriteFont.reset( new DirectX::SpriteFont( device.d3DDevice, L"res/fonts/timer_16.spritefont" ) );
 
   /* Maybe I want this in the future? Texture loading: */
   //CreateDDSTextureFromFile( device.d3DDevice, L"seafloor.dds", nullptr, &g_pTextureRV1 );
