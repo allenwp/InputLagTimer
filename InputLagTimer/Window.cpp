@@ -70,6 +70,58 @@ UINT Window::getMaxHeight()
   return mMaxHeight;
 }
 
+struct InsensitiveCompare
+{ 
+  bool operator() (const std::wstring& a, const std::wstring& b) const
+  {
+    return _wcsnicmp(a.c_str(), b.c_str(), 100) < 0;
+  }
+};
+
+std::set<std::wstring, InsensitiveCompare>* Window::getFontPaths(const std::wstring& rootPath, bool* outError)
+{
+  std::set<std::wstring, InsensitiveCompare>* result = new std::set<std::wstring, InsensitiveCompare>();
+  if(outError)
+  {
+    *outError = false;
+  }
+
+  /* Add "/*" to the end of the string to get all the files */
+  std::wstring filenameSearch = rootPath;
+  char lastChar = *rootPath.rbegin();
+  if(lastChar != '/' && lastChar != '\\')
+  {
+    filenameSearch += '/';
+  }
+  filenameSearch += '*';
+
+  WIN32_FIND_DATA ffd;
+  HANDLE hFind = FindFirstFile(filenameSearch.c_str(), &ffd);
+  if (INVALID_HANDLE_VALUE == hFind) 
+  {
+    if(outError)
+    {
+      *outError = true;
+    }
+  }
+  else
+  {
+    do
+    {
+      std::wstring fileName = std::wstring(ffd.cFileName);
+      if((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+      {
+        result->insert(fileName);
+      }
+    }
+    while (FindNextFile(hFind, &ffd) != 0);
+
+    FindClose(hFind);
+  }
+
+  return result;
+}
+
 Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device)
   :mModel(nullptr)
 {
@@ -150,8 +202,18 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
 
   /* DirectX Toolkit setup */
   mSpriteBatch.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
-
-  mSpriteFont.reset( new DirectX::SpriteFont( device.d3DDevice, L"res/fonts/timer_16.spritefont" ) );
+  
+  std::wstring path = L"res/fonts/";
+  bool error;
+  std::set<std::wstring, InsensitiveCompare>* fontPaths = getFontPaths(path.c_str(), &error);
+  for(auto iter = fontPaths->begin(); iter != fontPaths->end(); ++iter)
+  {
+    std::wstring fullPath = path;
+    fullPath.append(*iter);
+    DirectX::SpriteFont* spriteFont = new DirectX::SpriteFont( device.d3DDevice, fullPath.c_str() );
+    mSpriteFonts.push_back(spriteFont);
+  }
+  delete fontPaths;
 
   /* Maybe I want this in the future? Texture loading: */
   //CreateDDSTextureFromFile( device.d3DDevice, L"seafloor.dds", nullptr, &g_pTextureRV1 );
@@ -168,6 +230,10 @@ Window::~Window(void)
   mSwapChain->Release();
   mRenderTargetView->Release();
   mDXGIOutput->Release();
+  for(auto iter = mSpriteFonts.begin(); iter != mSpriteFonts.end(); ++iter)
+  {
+    delete *iter;
+  }
   delete windowName;
 }
 
@@ -185,20 +251,6 @@ void Window::render(const WindowManager::Device& device)
 {
   device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
-  // Just clear the backbuffer
-  //float red = (double)rand() / (double)RAND_MAX;
-  //float green = (double)rand() / (double)RAND_MAX;
-  //float blue = (double)rand() / (double)RAND_MAX;
-  //float ClearColor[4] = { red, green, blue, 1.0f }; //red,green,blue,alpha;
-  //if(windowNumber == 1)
-  //{
-  //  ClearColor[0] = 1.0;
-  //}
-  //else
-  //{
-  //  ClearColor[1] = 1.0;
-  //  ClearColor[2] = 1.0;
-  //}
   float ClearColor[4] = { 0.5, 0.5, 0.5, 1.0f };
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
@@ -220,32 +272,39 @@ void Window::renderModel(Model* model)
   // TODO: Determine which of deferred or immediate gives the least latency.
   mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
 
+  auto fontIter = mSpriteFonts.begin();
   int x = TIMER_VALUE_PADDING;
   while(x < mMaxWidth)
   {
     int column = model->getColumn();
-    x = drawColumn(timerString, x, column, *mSpriteFont);
+    x = drawColumn(timerString, x, column, *fontIter);
+
+    ++fontIter;
+    if(fontIter == mSpriteFonts.end())
+    {
+      --fontIter;
+    }
   }
 
   mSpriteBatch->End();
 }
 
-int Window::drawColumn(const wchar_t* timerString, int x, int column, const DirectX::SpriteFont& font)
+int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font)
 {
   int y = TIMER_VALUE_PADDING;
-  DirectX::XMVECTOR textSize = font.MeasureString(L"888.88");
+  DirectX::XMVECTOR textSize = font->MeasureString(L"888.88");
   int textWidth = ceilf(textSize.m128_f32[0]); // TODO: figure out how to access stuff via .x property. :S
   int lineHeight = ceilf(textSize.m128_f32[1]);
 
   /* Draw header */
-  mSpriteFont->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
+  font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
   y += lineHeight + TIMER_VALUE_PADDING;
   
   /* Draw Timer Values */
   int textX = x + (textWidth * column);
   while(y < getMaxHeight())
   {
-    mSpriteFont->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), TIMER_VALUE_COLOUR);
+    font->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), TIMER_VALUE_COLOUR);
     y += lineHeight + TIMER_VALUE_PADDING;
   }
   
