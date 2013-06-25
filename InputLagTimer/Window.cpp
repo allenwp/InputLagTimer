@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #define TIMER_VALUE_PADDING 10.0
-#define TIMER_VALUE_COLOUR DirectX::Colors::Yellow
+#define TIMER_VALUE_COLOUR DirectX::Colors::White
 #define COLUMN_SEPARATOR_WIDTH 15.0
 
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
@@ -251,7 +251,7 @@ void Window::render(const WindowManager::Device& device)
 {
   device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
-  float ClearColor[4] = { 0.5, 0.5, 0.5, 1.0f };
+  float ClearColor[4] = { 0.0, 0.0, 0.0, 1.0f };
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
   mModel->update();
