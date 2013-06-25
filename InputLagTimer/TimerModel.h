@@ -46,7 +46,7 @@ public:
 
   void reportError(ErrorType error, bool isPermanent);
 
-  ErrorType currentError();
+  ErrorType getCurrentError();
 
 protected:
   LARGE_INTEGER mStartingCount;

@@ -288,7 +288,7 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
 
   mSpriteBatch->End();
 
-  if(Model::ERROR_TYPE_NONE != mModel->currentError())
+  if(Model::ERROR_TYPE_NONE != mModel->getCurrentError())
   {
     float ClearColor[4] = { 1.0, 0.0, 0.0, 1.0f };
     device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );

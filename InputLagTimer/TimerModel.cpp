@@ -7,7 +7,8 @@ Model::Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain)
   :mStartingCount(startingCount),
   mLastCount(startingCount),
   mLastRenderTime(0.0),
-  mColumn(0)
+  mColumn(0),
+  mCurrerntError(Model::ERROR_TYPE_NONE)
 {
   mCountsSinceRefresh.QuadPart = 0;
 
@@ -109,8 +110,7 @@ void Model::reportError(Model::ErrorType error, bool isPermanent)
   // TODO
 }
 
-Model::ErrorType Model::currentError()
+Model::ErrorType Model::getCurrentError()
 {
-  // TODO
-  return ERROR_TYPE_NONE;
+  return mCurrerntError;
 }
