@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TimerModel.h"
 
+int Model::numColumns = 2;
 
 Model::Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain)
   :mStartingCount(startingCount),
@@ -65,7 +66,7 @@ void Model::update()
   {
     mCountsSinceRefresh.QuadPart -= mCountsPerRefresh.QuadPart;
     mColumn++;
-    if(mColumn > 2)
+    if(mColumn > numColumns - 1)
     {
       mColumn = 0;
     }

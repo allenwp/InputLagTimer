@@ -14,6 +14,8 @@ public:
     ERROR_RENDER_TIME_VARIANCE_TOO_HIGH
   };
 
+  static int numColumns;
+
   Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain);
   virtual ~Model(void);
 

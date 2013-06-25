@@ -312,7 +312,7 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   }
   
   /* Draw Column Separator */
-  int separatorX = x + (textWidth * 3) + COLUMN_SEPARATOR_WIDTH;
+  int separatorX = x + (textWidth * Model::numColumns) + COLUMN_SEPARATOR_WIDTH;
 
   return separatorX;
 }
