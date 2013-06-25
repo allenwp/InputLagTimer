@@ -255,12 +255,12 @@ void Window::render(const WindowManager::Device& device)
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
   
   mModel->update();
-  renderModel(mModel);
+  renderModel(mModel, device);
   mSwapChain->Present( 0, 0 );
   mModel->renderComplete();
 }
 
-void Window::renderModel(Model* model)
+void Window::renderModel(Model* model, const WindowManager::Device& device)
 {
   /* Generate strings */
   Model::TimerValue timerValue = model->getTimerValue();
@@ -287,6 +287,13 @@ void Window::renderModel(Model* model)
   }
 
   mSpriteBatch->End();
+
+  if(Model::ERROR_TYPE_NONE != mModel->currentError())
+  {
+    float ClearColor[4] = { 1.0, 0.0, 0.0, 1.0f };
+    device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
+
+  }
 }
 
 int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader)

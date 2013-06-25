@@ -45,7 +45,7 @@ void Model::update()
 
   if(currentCount.QuadPart < mStartingCount.QuadPart)
   {
-    reportError(ERROR_COUNTER_OVERFLOW, true);
+    reportError(ERROR_TYPE_COUNTER_OVERFLOW, true);
   }
 
   LARGE_INTEGER countSinceStart, countSinceLast;
@@ -89,11 +89,6 @@ void Model::renderComplete()
   mLastRenderTime = ((double)renderCount.QuadPart) / performanceFrequency.QuadPart;
 }
 
-void Model::reportError(Model::ErrorType error, bool isPermanent)
-{
-  // TODO
-}
-
 Model::TimerValue Model::getTimerValue() const
 {
   return mTimerValue;
@@ -107,4 +102,15 @@ int Model::getColumn() const
 double Model::getLastRenderTime() const
 {
   return mLastRenderTime;
+}
+
+void Model::reportError(Model::ErrorType error, bool isPermanent)
+{
+  // TODO
+}
+
+Model::ErrorType Model::currentError()
+{
+  // TODO
+  return ERROR_TYPE_NONE;
 }

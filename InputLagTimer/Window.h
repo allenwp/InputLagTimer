@@ -34,7 +34,7 @@ public:
   IDXGISwapChain* getSwapChain();
 
 protected:
-  void renderModel(Model* model);
+  void renderModel(Model* model, const WindowManager::Device& device);
 
   /**
    * @return the new x coordinate of the right of the column that was just drawn
