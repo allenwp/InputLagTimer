@@ -2,13 +2,18 @@
 #include "TimerModel.h"
 
 int Model::numColumns = 2;
+Model::ErrorType Model::mCurrerntError = Model::ERROR_TYPE_NONE;
+
+Model::ErrorType Model::getCurrentError()
+{
+  return mCurrerntError;
+}
 
 Model::Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain)
   :mStartingCount(startingCount),
   mLastCount(startingCount),
   mLastRenderTime(0.0),
-  mColumn(0),
-  mCurrerntError(Model::ERROR_TYPE_NONE)
+  mColumn(0)
 {
   mCountsSinceRefresh.QuadPart = 0;
 
@@ -108,9 +113,4 @@ double Model::getLastRenderTime() const
 void Model::reportError(Model::ErrorType error, bool isPermanent)
 {
   // TODO
-}
-
-Model::ErrorType Model::getCurrentError()
-{
-  return mCurrerntError;
 }

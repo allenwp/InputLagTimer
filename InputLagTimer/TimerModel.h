@@ -15,6 +15,8 @@ public:
     ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH
   };
 
+  static ErrorType getCurrentError();
+
   static int numColumns;
 
   Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain);
@@ -46,9 +48,9 @@ public:
 
   void reportError(ErrorType error, bool isPermanent);
 
-  ErrorType getCurrentError();
-
 protected:
+  static ErrorType mCurrerntError;
+
   LARGE_INTEGER mStartingCount;
   LARGE_INTEGER mLastCount;
   TimerValue mTimerValue;
@@ -57,7 +59,5 @@ protected:
   LARGE_INTEGER mCountsSinceRefresh;
   DXGI_SWAP_CHAIN_DESC mSwapChainDesc;
   int mColumn;
-
-  ErrorType mCurrerntError;
 };
 
