@@ -289,7 +289,7 @@ void Window::renderModel(Model* model)
   mSpriteBatch->End();
 }
 
-int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font)
+int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader)
 {
   int y = TIMER_VALUE_PADDING;
   DirectX::XMVECTOR textSize = font->MeasureString(L"888.88");
@@ -297,8 +297,11 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   int lineHeight = ceilf(textSize.m128_f32[1]);
 
   /* Draw header */
-  font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
-  y += lineHeight + TIMER_VALUE_PADDING;
+  if(drawHeader)
+  {
+    font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
+    y += lineHeight + TIMER_VALUE_PADDING;
+  }
   
   /* Draw Timer Values */
   int textX = x + (textWidth * column);

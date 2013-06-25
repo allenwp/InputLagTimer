@@ -38,8 +38,12 @@ protected:
 
   /**
    * @return the new x coordinate of the right of the column that was just drawn
+   * @param drawHeader will draw "12345.67890" as reference digits at the top of the column.
+   * The header was an old feature that was designed to help reability, but after the discovery
+   * of varaible latancy displays, it was decided that the header would take away from otherwise
+   * important values at the top of the column.
    */
-  int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font);
+  int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader = false);
 
   static TCHAR windowClassName[];
   static int windowCount;
