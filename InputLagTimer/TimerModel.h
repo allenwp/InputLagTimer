@@ -12,8 +12,7 @@ public:
   {
     ERROR_TYPE_NONE,
     ERROR_TYPE_COUNTER_OVERFLOW, /* Program needs restart because the performance counter has no defined maximum and has wrapped around. */
-    ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH,
-    ERROR_TYPE_MODEL_UPDATE_VARIANCE_TOO_HIGH
+    ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH
   };
 
   static void reportError(ErrorType error, bool isPermanent);
