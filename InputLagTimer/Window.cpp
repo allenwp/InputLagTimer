@@ -308,7 +308,10 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
       errorMessage = L"Performance counter has overflowed.\nPlease close and re-open this program.";
       break;
     case Model::ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH:
-      errorMessage = L"Render time variance too high. Waiting for stability...";
+      errorMessage = L"Render time variance too high.\nWaiting for stability...";
+      break;
+    case Model::ERROR_TYPE_MODEL_UPDATE_VARIANCE_TOO_HIGH:
+      errorMessage = L"Model update variance too high.\nWaiting for stability...";
       break;
     }
     mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), TIMER_VALUE_COLOUR);

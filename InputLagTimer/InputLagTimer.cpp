@@ -50,6 +50,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
   // Main message loop
   MSG msg = {0};
+  bool justRendered = true;
   while( WM_QUIT != msg.message )
   {
     if(!windowManager)
@@ -63,17 +64,22 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
     }
     else
     {
-      if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
+      /* Only process the next message if we just finished rendering.
+         This ensures that no more than one message is ever processed at a time
+         and therefore prevents a large batch of messages from delaying renders. */
+      if( justRendered && PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )
       {
 	  	  if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 	  	  {
 	  		  TranslateMessage(&msg);
 	  		  DispatchMessage(&msg);
 	  	  }
+        justRendered = false;
       }
       else
       {
         windowManager->render();
+        justRendered = true;
       }
     }
   }
