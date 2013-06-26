@@ -3,6 +3,16 @@
 
 int Model::numColumns = 2;
 Model::ErrorType Model::mCurrerntError = Model::ERROR_TYPE_NONE;
+bool Model::mIsCurrentErrorPermanent = false;
+
+void Model::reportError(Model::ErrorType error, bool isPermanent)
+{
+  if(!mIsCurrentErrorPermanent)
+  {
+    mIsCurrentErrorPermanent = isPermanent;
+    mCurrerntError = error;
+  }
+}
 
 Model::ErrorType Model::getCurrentError()
 {
@@ -108,9 +118,4 @@ int Model::getColumn() const
 double Model::getLastRenderTime() const
 {
   return mLastRenderTime;
-}
-
-void Model::reportError(Model::ErrorType error, bool isPermanent)
-{
-  // TODO
 }

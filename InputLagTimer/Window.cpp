@@ -203,7 +203,8 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   /* DirectX Toolkit setup */
   mSpriteBatch.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
   
-  std::wstring path = L"res/fonts/";
+  /* Load fonts */
+  std::wstring path = L"res/fonts/timer/";
   bool error;
   std::set<std::wstring, InsensitiveCompare>* fontPaths = getFontPaths(path.c_str(), &error);
   for(auto iter = fontPaths->begin(); iter != fontPaths->end(); ++iter)
@@ -214,6 +215,7 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
     mSpriteFonts.push_back(spriteFont);
   }
   delete fontPaths;
+  mSpriteFontNormal = new DirectX::SpriteFont( device.d3DDevice, L"res/fonts/normal.spritefont" );
 
   /* Maybe I want this in the future? Texture loading: */
   //CreateDDSTextureFromFile( device.d3DDevice, L"seafloor.dds", nullptr, &g_pTextureRV1 );
@@ -234,6 +236,7 @@ Window::~Window(void)
   {
     delete *iter;
   }
+  delete mSpriteFontNormal;
   delete windowName;
 }
 
@@ -288,11 +291,28 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
 
   mSpriteBatch->End();
 
-  if(Model::ERROR_TYPE_NONE != mModel->getCurrentError())
+  /* Render error if there is one */
+  Model::ErrorType currentError = mModel->getCurrentError();
+  if(Model::ERROR_TYPE_NONE != currentError)
   {
     float ClearColor[4] = { 1.0, 0.0, 0.0, 1.0f };
     device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
-
+    
+    mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
+    std::wstring errorMessage;
+    switch (currentError)
+    {
+    case Model::ERROR_TYPE_NONE:
+      break;
+    case Model::ERROR_TYPE_COUNTER_OVERFLOW:
+      errorMessage = L"Performance counter has overflowed.\nPlease close and re-open this program.";
+      break;
+    case Model::ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH:
+      errorMessage = L"Render time variance too high. Waiting for stability...";
+      break;
+    }
+    mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), TIMER_VALUE_COLOUR);
+    mSpriteBatch->End();
   }
 }
 

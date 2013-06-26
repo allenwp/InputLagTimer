@@ -58,4 +58,5 @@ protected:
 
   std::unique_ptr<DirectX::SpriteBatch> mSpriteBatch;
   std::vector<DirectX::SpriteFont*> mSpriteFonts;
+  DirectX::SpriteFont* mSpriteFontNormal;
 };

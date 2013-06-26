@@ -15,6 +15,8 @@ public:
     ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH
   };
 
+  static void reportError(ErrorType error, bool isPermanent);
+
   static ErrorType getCurrentError();
 
   static int numColumns;
@@ -46,10 +48,9 @@ public:
    */
   double getLastRenderTime() const;
 
-  void reportError(ErrorType error, bool isPermanent);
-
 protected:
   static ErrorType mCurrerntError;
+  static bool mIsCurrentErrorPermanent;
 
   LARGE_INTEGER mStartingCount;
   LARGE_INTEGER mLastCount;
