@@ -100,8 +100,15 @@ WindowManager::~WindowManager(void)
 
 void WindowManager::render()
 {
+  std::vector<Model*> models;
+  for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
+  {
+    models.push_back(iter->window->getModel());
+  }
+  Model::loopStarted(models);
   for(auto iter = mWindows.begin(); iter != mWindows.end(); ++iter)
   {
     iter->window->render(iter->device);
   }
+  Model::loopComplete();
 }

@@ -32,6 +32,7 @@ public:
   void render(const WindowManager::Device& device);
 
   IDXGISwapChain* getSwapChain();
+  Model* getModel();
 
 protected:
   void renderModel(Model* model, const WindowManager::Device& device);

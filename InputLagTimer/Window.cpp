@@ -308,7 +308,10 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
       errorMessage = L"Performance counter has overflowed.\nPlease close and re-open this program.";
       break;
     case Model::ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH:
-      errorMessage = L"Render time variance too high.\nWaiting for stability...";
+      errorMessage = L"Jitter (render time variance) too high.\nWaiting for stability...";
+      break;
+    case Model::ERROR_TYPE_ACCURACY_TOO_LOW:
+      errorMessage = L"Timer accuracy too low (> +/-1 ms)\nWaiting for stability...";
       break;
     }
     mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), TIMER_VALUE_COLOUR);
@@ -347,4 +350,9 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
 IDXGISwapChain* Window::getSwapChain()
 {
   return mSwapChain;
+}
+
+Model* Window::getModel()
+{
+  return mModel;
 }

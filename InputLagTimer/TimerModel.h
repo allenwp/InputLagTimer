@@ -1,4 +1,7 @@
 #pragma once
+
+#include <vector>
+
 class Model
 {
 public:
@@ -12,12 +15,27 @@ public:
   {
     ERROR_TYPE_NONE,
     ERROR_TYPE_COUNTER_OVERFLOW, /* Program needs restart because the performance counter has no defined maximum and has wrapped around. */
-    ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH
+    ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH,
+    ERROR_TYPE_ACCURACY_TOO_LOW
   };
+
+  static void loopStarted(const std::vector<Model*>& models);
+
+  static void loopComplete();
 
   static void reportError(ErrorType error, bool isPermanent);
 
   static ErrorType getCurrentError();
+
+  /**
+   * @return The maximum render time variance in seconds that has been reported over the last second.
+   */
+  static double getMaxRenderTimeVariance();
+
+  /**
+   * @return The frames counted over the last second.
+   */
+  static int getFPS();
 
   static int numColumns;
 
@@ -43,22 +61,36 @@ public:
    */
   int getColumn() const;
 
-  /**
-   * @return The last render time in seconds.
-   */
-  double getLastRenderTime() const;
-
 protected:
+  static void recordRecordValuesForHUD();
+  static void resetErrors();
+
   static ErrorType mCurrerntError;
   static bool mIsCurrentErrorPermanent;
+  
+  static double mLastRenderTimeVariance;
+  static double mMaxRenderTimeVariance;
+  static double mDisplayRenderTimeVariance;
+  
+  static int mFrameCount;
+  static int mFPS;
+  
+  static double mLowestAccuracy;
+  static double mDisplayAccuracy;
+
+  DXGI_SWAP_CHAIN_DESC mSwapChainDesc;
+  
+  LARGE_INTEGER mCountsPerRefresh;
+  LARGE_INTEGER mCountsSinceRefresh;
 
   LARGE_INTEGER mStartingCount;
   LARGE_INTEGER mLastCount;
   TimerValue mTimerValue;
-  double mLastRenderTime;
-  LARGE_INTEGER mCountsPerRefresh;
-  LARGE_INTEGER mCountsSinceRefresh;
-  DXGI_SWAP_CHAIN_DESC mSwapChainDesc;
+
   int mColumn;
+
+  double mLastRenderTime;
+  /** The last accuracy in seconds */
+  double mLastAccuracy;
 };
 
