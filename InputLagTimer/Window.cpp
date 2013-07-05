@@ -34,29 +34,29 @@ ATOM Window::registerWindow(HINSTANCE hInstance)
 
 LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
-	PAINTSTRUCT ps;
-	HDC hdc;
+  int wmId, wmEvent;
+  PAINTSTRUCT ps;
+  HDC hdc;
 
   // TODO: Handle ESC key?
-	switch (message)
-	{
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code here...
-		EndPaint(hWnd, &ps);
-		break;
+  switch (message)
+  {
+  case WM_PAINT:
+    hdc = BeginPaint(hWnd, &ps);
+    // TODO: Add any drawing code here...
+    EndPaint(hWnd, &ps);
+    break;
   case WM_SETCURSOR:
     SetCursor(NULL);
     return true;
     break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
+  case WM_DESTROY:
+    PostQuitMessage(0);
+    break;
+  default:
+    return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+  return 0;
 }
 
 int Window::getWindowCount()
