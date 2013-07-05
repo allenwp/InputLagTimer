@@ -74,9 +74,16 @@ protected:
   
   static int mFrameCount;
   static int mFPS;
+  static double mPreviousTimeValue;
+  static double mFPSTime;
   
   static double mLowestAccuracy;
   static double mDisplayAccuracy;
+
+  /** In seconds. Timer models write to this for use in static error checking and update
+      functions so they do not need to make another queryPerofrmanceCounter call. */
+  static double mLastTimeValue;
+  static double mLastReportedErrorTime;
 
   DXGI_SWAP_CHAIN_DESC mSwapChainDesc;
   

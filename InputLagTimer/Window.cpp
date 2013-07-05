@@ -311,7 +311,7 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
       errorMessage = L"Jitter (render time variance) too high.\nWaiting for stability...";
       break;
     case Model::ERROR_TYPE_ACCURACY_TOO_LOW:
-      errorMessage = L"Timer accuracy too low (> +/-1 ms)\nWaiting for stability...";
+      errorMessage = L"Timer accuracy too low (> +/-3 ms)\nWaiting for stability...";
       break;
     }
     mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), TIMER_VALUE_COLOUR);

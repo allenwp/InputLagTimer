@@ -11,9 +11,14 @@ double Model::mDisplayRenderTimeVariance = 0.0;
 
 int Model::mFrameCount = 0;
 int Model::mFPS = 0;
+double Model::mPreviousTimeValue = 0;
+double Model::mFPSTime = 0;
 
 double Model::mLowestAccuracy = 0.0;
 double Model::mDisplayAccuracy = 0.0;
+
+double Model::mLastTimeValue = 0.0;
+double Model::mLastReportedErrorTime = 0.0;
 
 void Model::loopStarted(const std::vector<Model*>& models)
 {
@@ -66,7 +71,7 @@ void Model::loopStarted(const std::vector<Model*>& models)
   /* Add the render time variance to the lowest accuracy for total accuracy rating. */
   lowAccuracy += mLastRenderTimeVariance;
 
-  if(lowAccuracy > 0.001)
+  if(lowAccuracy > 0.003)
   {
     reportError(ERROR_TYPE_ACCURACY_TOO_LOW, false);
   }
@@ -91,6 +96,7 @@ void Model::reportError(Model::ErrorType error, bool isPermanent)
   {
     mIsCurrentErrorPermanent = isPermanent;
     mCurrerntError = error;
+    mLastReportedErrorTime = mLastTimeValue;
   }
 }
 
@@ -111,11 +117,13 @@ int Model::getFPS()
 
 void Model::recordRecordValuesForHUD()
 {
-  //TODO: If one second has passed
-  if(true)
+  mFPSTime += mPreviousTimeValue - mLastTimeValue;
+  
+  if(mFPSTime >= 1.0)
   {
     mFPS = mFrameCount;
     mFrameCount = 0;
+    mFPSTime -= 1.0;
 
     mDisplayRenderTimeVariance = mMaxRenderTimeVariance;
     mMaxRenderTimeVariance = 0.0;
@@ -123,12 +131,15 @@ void Model::recordRecordValuesForHUD()
     mDisplayAccuracy = mLowestAccuracy;
     mLowestAccuracy = 0.0;
   }
+
+  mPreviousTimeValue = mLastTimeValue;
 }
 
 void Model::resetErrors()
 {
-  //TODO: 1.5 seconds after last non-permanent error...
-  if(!mIsCurrentErrorPermanent && true)
+  double timeSinseLastError = mLastTimeValue - mLastReportedErrorTime;
+  /* Reset if it's been 1.5 seconds */
+  if(!mIsCurrentErrorPermanent && timeSinseLastError > 1.5)
   {
     mCurrerntError = ERROR_TYPE_NONE;
   }
@@ -183,6 +194,7 @@ void Model::update()
   LARGE_INTEGER countSinceStart, countSinceLast;
   countSinceStart.QuadPart = currentCount.QuadPart - mStartingCount.QuadPart;
   double secondsSinceStart = ((double)countSinceStart.QuadPart) / performanceFrequency.QuadPart;
+  mLastTimeValue = secondsSinceStart;
   countSinceLast.QuadPart = currentCount.QuadPart - mLastCount.QuadPart;
   double secondsSinceLast = ((double)countSinceLast.QuadPart) / performanceFrequency.QuadPart;
 
