@@ -46,6 +46,10 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		// TODO: Add any drawing code here...
 		EndPaint(hWnd, &ps);
 		break;
+  case WM_SETCURSOR:
+    SetCursor(NULL);
+    return true;
+    break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
