@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TimerModel.h"
+#include "Config.h"
 
-int Model::numColumns = 2;
 Model::ErrorType Model::mCurrerntError = Model::ERROR_TYPE_NONE;
 bool Model::mIsCurrentErrorPermanent = false;
 
@@ -43,7 +43,7 @@ void Model::loopStarted(const std::vector<Model*>& models)
   }
   mLastRenderTimeVariance = highRenderTime - lowRenderTime;
 
-  if(mLastRenderTimeVariance > 0.0001)
+  if(mLastRenderTimeVariance > Config::highestJitter)
   {
     Model::reportError(ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH, false);
   }
@@ -71,7 +71,7 @@ void Model::loopStarted(const std::vector<Model*>& models)
   /* Add the render time variance to the lowest accuracy for total accuracy rating. */
   lowAccuracy += mLastRenderTimeVariance;
 
-  if(lowAccuracy > 0.003)
+  if(lowAccuracy > Config::lowestAccuracy)
   {
     reportError(ERROR_TYPE_ACCURACY_TOO_LOW, false);
   }
@@ -213,7 +213,7 @@ void Model::update()
   {
     mCountsSinceRefresh.QuadPart -= mCountsPerRefresh.QuadPart;
     mColumn++;
-    if(mColumn > numColumns - 1)
+    if(mColumn > Config::numColumns - 1)
     {
       mColumn = 0;
     }

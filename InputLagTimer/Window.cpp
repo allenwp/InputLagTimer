@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Window.h"
 #include <assert.h>
+#include "Config.h"
 
 #define TIMER_VALUE_PADDING 10.0
-#define TIMER_VALUE_COLOUR DirectX::Colors::White
 #define COLUMN_SEPARATOR_WIDTH 15.0
 
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
@@ -315,10 +315,10 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
       errorMessage = L"Jitter (render time variance) too high.\nWaiting for stability...";
       break;
     case Model::ERROR_TYPE_ACCURACY_TOO_LOW:
-      errorMessage = L"Timer accuracy too low (> +/-3 ms)\nWaiting for stability...";
+      errorMessage = L"Timer accuracy too low.\nWaiting for stability...";
       break;
     }
-    mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), TIMER_VALUE_COLOUR);
+    mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), DirectX::Colors::White);
     mSpriteBatch->End();
   }
 }
@@ -333,7 +333,7 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   /* Draw header */
   if(drawHeader)
   {
-    font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), TIMER_VALUE_COLOUR);
+    font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), Config::fontColour);
     y += lineHeight + TIMER_VALUE_PADDING;
   }
   
@@ -341,12 +341,12 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   int textX = x + (textWidth * column);
   while(y < getMaxHeight())
   {
-    font->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), TIMER_VALUE_COLOUR);
+    font->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), Config::fontColour);
     y += lineHeight + TIMER_VALUE_PADDING;
   }
   
   /* Draw Column Separator */
-  int separatorX = x + (textWidth * Model::numColumns) + COLUMN_SEPARATOR_WIDTH;
+  int separatorX = x + (textWidth * Config::numColumns) + COLUMN_SEPARATOR_WIDTH;
 
   return separatorX;
 }

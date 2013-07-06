@@ -5,6 +5,7 @@
 #include "InputLagTimer.h"
 #include "Setup.h"
 #include "WindowManager.h"
+#include "Config.h"
 
 #define MAX_LOADSTRING 100
 
@@ -28,7 +29,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
- 	// TODO: Place code here.
 	HACCEL hAccelTable;
 
 	// Initialize global strings
@@ -42,6 +42,10 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
+  /* Config INI file */
+  Config::config();
+
+  /* Setup of windows */
   Setup* setup = new Setup();
   windowManager = new WindowManager(setup->getSettings(), hInstance);
   delete setup;

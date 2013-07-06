@@ -83,6 +83,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="InputLagTimer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Setup.h" />
@@ -93,6 +94,7 @@
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="InputLagTimer.cpp" />
     <ClCompile Include="Setup.cpp" />
     <ClCompile Include="stdafx.cpp">

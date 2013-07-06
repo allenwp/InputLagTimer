@@ -37,8 +37,6 @@ public:
    */
   static int getFPS();
 
-  static int numColumns;
-
   Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain);
   virtual ~Model(void);
 
