@@ -380,7 +380,7 @@ void Window::drawHUD()
   max accuracy
   +/-0.01ms
   */
-  _snwprintf_s(buffer, 500, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\ninputlag\n.allenwp\n.com",
+  _snwprintf_s(buffer, 500, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\nv0.8\n\ninputlag\n.allenwp\n.com",
     1, 2, 1920, 1080, 59.97,
     542,
     5.23, 10.0,
