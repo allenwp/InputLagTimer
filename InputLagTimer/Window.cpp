@@ -7,6 +7,7 @@
 #define TIMER_VALUE_PADDING 10
 #define COLUMN_SEPARATOR_WIDTH 15
 
+/* TODO: make these static class variables you dummie. >_> */
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
 int Window::windowCount = 0;
 UINT Window::mMaxWidth = 0;
@@ -352,7 +353,7 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
 
 void Window::drawHUD()
 {
-  wchar_t buffer[500];
+  wchar_t buffer[250];
   /*
   output1/2
   1920x1080
@@ -380,11 +381,11 @@ void Window::drawHUD()
   max accuracy
   +/-0.01ms
   */
-  _snwprintf_s(buffer, 500, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\nv0.8\n\ninputlag\n.allenwp\n.com",
-    1, 2, 1920, 1080, 59.97,
-    542,
-    5.23, 10.0,
-    2.45, 2.0);
+  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\nv0.8\n\ninputlag\n.allenwp\n.com",
+    mWindowNumber, windowCount, mBufferDesc.Width, mBufferDesc.Height, static_cast<float>(mBufferDesc.RefreshRate.Numerator / mBufferDesc.RefreshRate.Denominator),
+    mModel->getFPS(),
+    static_cast<float>(mModel->getAccuracy() * 1000.0f), static_cast<float>(Config::lowestAccuracy * 1000.0f),
+    static_cast<float>(mModel->getJitter() * 1000.0f), static_cast<float>(Config::highestJitter * 1000.0f));
   DirectX::XMVECTOR textSize = mSpriteFontNormal->MeasureString(buffer);
   mSpriteFontNormal->DrawString( mSpriteBatch.get(), buffer, DirectX::XMFLOAT2(10 , 10), Config::fontColour);
 }

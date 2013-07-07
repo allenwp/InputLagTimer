@@ -28,9 +28,14 @@ public:
   static ErrorType getCurrentError();
 
   /**
+   * @return The lowest accuracy reported over the last second.
+   */
+  static double getAccuracy();
+
+  /**
    * @return The maximum render time variance in seconds that has been reported over the last second.
    */
-  static double getMaxRenderTimeVariance();
+  static double getJitter();
 
   /**
    * @return The frames counted over the last second.

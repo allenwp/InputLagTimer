@@ -5,6 +5,6 @@ DirectXTK\MakeSpriteFont\bin\Release\MakeSpriteFont.exe "Arabic Typesetting" Inp
 DirectXTK\MakeSpriteFont\bin\Release\MakeSpriteFont.exe "Arabic Typesetting" InputLagTimer\res\fonts\timer\0064.spritefont /FontSize:64 /LineSpacing:-30 /CharacterSpacing:0
 DirectXTK\MakeSpriteFont\bin\Release\MakeSpriteFont.exe "Arabic Typesetting" InputLagTimer\res\fonts\timer\0128.spritefont /FontSize:128 /LineSpacing:-50 /CharacterSpacing:0
 
-DirectXTK\MakeSpriteFont\bin\Release\MakeSpriteFont.exe "Arabic Typesetting" InputLagTimer\res\fonts\normal.spritefont /FontSize:32 /LineSpacing:-15 /CharacterSpacing:0
+DirectXTK\MakeSpriteFont\bin\Release\MakeSpriteFont.exe "Franklin Gothic Medium" InputLagTimer\res\fonts\normal.spritefont /FontSize:20 /LineSpacing:0 /CharacterSpacing:0
 
 pause

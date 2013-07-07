@@ -105,9 +105,14 @@ Model::ErrorType Model::getCurrentError()
   return mCurrerntError;
 }
 
-double Model::getMaxRenderTimeVariance()
+double Model::getAccuracy()
 {
-  return mMaxRenderTimeVariance;
+  return mDisplayAccuracy;
+}
+
+double Model::getJitter()
+{
+  return mDisplayRenderTimeVariance;
 }
 
 int Model::getFPS()
@@ -117,7 +122,7 @@ int Model::getFPS()
 
 void Model::recordRecordValuesForHUD()
 {
-  mFPSTime += mPreviousTimeValue - mLastTimeValue;
+  mFPSTime += mLastTimeValue - mPreviousTimeValue;
   
   if(mFPSTime >= 1.0)
   {
