@@ -2,6 +2,7 @@
 #include "Window.h"
 #include <assert.h>
 #include "Config.h"
+#include <stdio.h>
 
 #define TIMER_VALUE_PADDING 10.0
 #define COLUMN_SEPARATOR_WIDTH 15.0
@@ -281,17 +282,15 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
 
   auto fontIter = mSpriteFonts.begin();
   int x = TIMER_VALUE_PADDING;
-  while(x < mMaxWidth)
+  while(x < mMaxWidth && fontIter != mSpriteFonts.end())
   {
     int column = model->getColumn();
     x = drawColumn(timerString, x, column, *fontIter);
 
     ++fontIter;
-    if(fontIter == mSpriteFonts.end())
-    {
-      --fontIter;
-    }
   }
+
+  drawHUD();
 
   mSpriteBatch->End();
 
@@ -349,6 +348,45 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   int separatorX = x + (textWidth * Config::numColumns) + COLUMN_SEPARATOR_WIDTH;
 
   return separatorX;
+}
+
+void Window::drawHUD()
+{
+  wchar_t buffer[500];
+  /*
+  output1/2
+  1920x1080
+  59.97Hz
+
+  542FPS
+
+  accuracy
+  +/-5.23ms
+  error at
+  +/-10.0ms
+
+  jitter
+  2.45ms
+  error at
+  2.0ms
+
+  inputlag
+  .allenwp
+  .com
+
+  FUTURE:
+  time drift
+  0.00045ms/1ms
+  max accuracy
+  +/-0.01ms
+  */
+  _snwprintf_s(buffer, 500, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\ninputlag\n.allenwp\n.com",
+    1, 2, 1920, 1080, 59.97,
+    542,
+    5.23, 10.0,
+    2.45, 2.0);
+  DirectX::XMVECTOR textSize = mSpriteFontNormal->MeasureString(buffer);
+  mSpriteFontNormal->DrawString( mSpriteBatch.get(), buffer, DirectX::XMFLOAT2(10 , 10), Config::fontColour);
 }
 
 IDXGISwapChain* Window::getSwapChain()

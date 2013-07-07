@@ -44,7 +44,9 @@ protected:
    * of varaible latancy displays, it was decided that the header would take away from otherwise
    * important values at the top of the column.
    */
-  int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader = false);
+  int drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader = false);
+
+  void drawHUD();
 
   static TCHAR windowClassName[];
   static int windowCount;
