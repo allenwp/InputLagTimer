@@ -4,8 +4,8 @@
 #include "Config.h"
 #include <stdio.h>
 
-#define TIMER_VALUE_PADDING 10.0
-#define COLUMN_SEPARATOR_WIDTH 15.0
+#define TIMER_VALUE_PADDING 10
+#define COLUMN_SEPARATOR_WIDTH 15
 
 TCHAR Window::windowClassName[] = _T("InputLagTimerWindowClassName");
 int Window::windowCount = 0;
@@ -35,7 +35,6 @@ ATOM Window::registerWindow(HINSTANCE hInstance)
 
 LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  int wmId, wmEvent;
   PAINTSTRUCT ps;
   HDC hdc;
 
@@ -93,7 +92,7 @@ std::set<std::wstring, InsensitiveCompare>* Window::getFontPaths(const std::wstr
 
   /* Add "/*" to the end of the string to get all the files */
   std::wstring filenameSearch = rootPath;
-  char lastChar = *rootPath.rbegin();
+  wchar_t lastChar = *rootPath.rbegin();
   if(lastChar != '/' && lastChar != '\\')
   {
     filenameSearch += '/';
@@ -130,6 +129,7 @@ std::set<std::wstring, InsensitiveCompare>* Window::getFontPaths(const std::wstr
 Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, const WindowManager::Device& device)
   :mModel(nullptr)
 {
+  mBufferDesc = outputSettings.bufferDesc;
   mDXGIOutput = outputSettings.output;
   mDXGIOutput->AddRef();
 
@@ -138,13 +138,13 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   
   /* Create the window */
   windowCount++;
-  windowNumber = windowCount;
+  mWindowNumber = windowCount;
 
-  windowName = new TCHAR[256]; /* 256 is max window name length */
-  wsprintf(windowName, _T("Input Lag Timer - Output %i"), windowNumber);
+  mWindowName = new TCHAR[256]; /* 256 is max window name length */
+  wsprintf(mWindowName, _T("Input Lag Timer - Output %i"), mWindowNumber);
 
   HWND hWnd = CreateWindow(windowClassName,
-    windowName,
+    mWindowName,
     WS_OVERLAPPEDWINDOW,
     outputSettings.windowPositionLeft,
     outputSettings.windowPositionTop,
@@ -242,7 +242,7 @@ Window::~Window(void)
     delete *iter;
   }
   delete mSpriteFontNormal;
-  delete windowName;
+  delete mWindowName;
 }
 
 void Window::setFullscreen(BOOL fullscreen)
@@ -281,7 +281,7 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
   mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
 
   auto fontIter = mSpriteFonts.begin();
-  int x = TIMER_VALUE_PADDING;
+  unsigned int x = TIMER_VALUE_PADDING;
   while(x < mMaxWidth && fontIter != mSpriteFonts.end())
   {
     int column = model->getColumn();
@@ -324,15 +324,15 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
 
 int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader)
 {
-  int y = TIMER_VALUE_PADDING;
+  unsigned int y = TIMER_VALUE_PADDING;
   DirectX::XMVECTOR textSize = font->MeasureString(L"888.88");
-  int textWidth = ceilf(textSize.m128_f32[0]); // TODO: figure out how to access stuff via .x property. :S
-  int lineHeight = ceilf(textSize.m128_f32[1]);
+  int textWidth = static_cast<int>(ceilf(textSize.m128_f32[0])); // TODO: figure out how to access stuff via .x property. :S
+  int lineHeight = static_cast<int>(ceilf(textSize.m128_f32[1]));
 
   /* Draw header */
   if(drawHeader)
   {
-    font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(x , y), Config::fontColour);
+    font->DrawString( mSpriteBatch.get(), L"12345.67890", DirectX::XMFLOAT2(static_cast<float>(x) , static_cast<float>(y)), Config::fontColour);
     y += lineHeight + TIMER_VALUE_PADDING;
   }
   
@@ -340,7 +340,7 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   int textX = x + (textWidth * column);
   while(y < getMaxHeight())
   {
-    font->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(textX , y), Config::fontColour);
+    font->DrawString( mSpriteBatch.get(), timerString, DirectX::XMFLOAT2(static_cast<float>(textX) , static_cast<float>(y)), Config::fontColour);
     y += lineHeight + TIMER_VALUE_PADDING;
   }
   

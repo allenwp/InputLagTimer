@@ -88,7 +88,6 @@ void Setup::analizeSystem()
       ZeroMemory(&outputSettings, sizeof(OutputSetting));
 
       outputSettings.output = output;
-      outputSettings.maxTimerResolution = 0.0;
       getClosestDisplayModeToCurrent(output, &outputSettings.bufferDesc);
 
       /* Find the desktop coordinates of the window: */

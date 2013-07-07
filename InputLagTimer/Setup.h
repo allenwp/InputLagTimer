@@ -7,7 +7,6 @@ public:
   struct OutputSetting
   {
     IDXGIOutput* output;
-    double maxTimerResolution;
     DXGI_MODE_DESC bufferDesc;
     LONG windowPositionTop;
     LONG windowPositionLeft;

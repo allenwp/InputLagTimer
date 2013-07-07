@@ -52,8 +52,10 @@ protected:
   static int windowCount;
   static UINT mMaxWidth;
   static UINT mMaxHeight;
-  TCHAR* windowName;
-  int windowNumber;
+
+  DXGI_MODE_DESC mBufferDesc;
+  TCHAR* mWindowName;
+  int mWindowNumber;
   IDXGIOutput* mDXGIOutput;
   IDXGISwapChain* mSwapChain;
   ID3D11RenderTargetView* mRenderTargetView;
