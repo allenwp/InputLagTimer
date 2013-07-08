@@ -280,7 +280,6 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
   /* Render sprites */
   // TODO: Determine which of deferred or immediate gives the least latency.
   mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
-
   auto fontIter = mSpriteFonts.begin();
   unsigned int x = TIMER_VALUE_PADDING;
   while(x < mMaxWidth && fontIter != mSpriteFonts.end())
@@ -290,10 +289,9 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
 
     ++fontIter;
   }
+  mSpriteBatch->End();
 
   drawHUD();
-
-  mSpriteBatch->End();
 
   /* Render error if there is one */
   Model::ErrorType currentError = mModel->getCurrentError();
@@ -387,7 +385,12 @@ void Window::drawHUD()
     static_cast<float>(mModel->getAccuracy() * 1000.0f), static_cast<float>(Config::lowestAccuracy * 1000.0f),
     static_cast<float>(mModel->getJitter() * 1000.0f), static_cast<float>(Config::highestJitter * 1000.0f));
   DirectX::XMVECTOR textSize = mSpriteFontNormal->MeasureString(buffer);
+
+  // TODO: draw box
+
+  mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
   mSpriteFontNormal->DrawString( mSpriteBatch.get(), buffer, DirectX::XMFLOAT2(10 , 10), Config::fontColour);
+  mSpriteBatch->End();
 }
 
 IDXGISwapChain* Window::getSwapChain()
