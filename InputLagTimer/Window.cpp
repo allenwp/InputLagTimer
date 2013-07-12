@@ -209,6 +209,21 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
   /* DirectX Toolkit setup */
   mSpriteBatch.reset( new DirectX::SpriteBatch( device.d3DDeviceConext ) );
   
+  mPrimitiveBatch.reset(new DirectX::PrimitiveBatch<DirectX::VertexPositionColor>(device.d3DDeviceConext));
+  mBasicEffect.reset(new DirectX::BasicEffect(device.d3DDevice));
+
+  mBasicEffect->SetProjection(DirectX::XMMatrixOrthographicOffCenterRH(0, mBufferDesc.Width, mBufferDesc.Height, 0, 0, 1));
+  mBasicEffect->SetVertexColorEnabled(true);
+
+  void const* shaderByteCode;
+  size_t byteCodeLength;
+  mBasicEffect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
+  
+  device.d3DDevice->CreateInputLayout(DirectX::VertexPositionColor::InputElements,
+                            DirectX::VertexPositionColor::InputElementCount,
+                            shaderByteCode, byteCodeLength,
+                            &mInputLayout);
+
   /* Load fonts */
   std::wstring path = L"res/fonts/timer/";
   bool error;
@@ -260,8 +275,7 @@ void Window::render(const WindowManager::Device& device)
 {
   device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
-  float ClearColor[4] = { 0.0, 0.0, 0.0, 1.0f };
-  device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, ClearColor );
+  device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, Config::backgroundColour );
   
   mModel->update();
   renderModel(mModel, device);
@@ -291,7 +305,7 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
   }
   mSpriteBatch->End();
 
-  drawHUD();
+  drawHUD(device);
 
   /* Render error if there is one */
   Model::ErrorType currentError = mModel->getCurrentError();
@@ -349,7 +363,7 @@ int Window::drawColumn(const wchar_t* timerString, int x, int column, DirectX::S
   return separatorX;
 }
 
-void Window::drawHUD()
+void Window::drawHUD(const WindowManager::Device& device)
 {
   wchar_t buffer[250];
   /*
@@ -386,10 +400,24 @@ void Window::drawHUD()
     static_cast<float>(mModel->getJitter() * 1000.0f), static_cast<float>(Config::highestJitter * 1000.0f));
   DirectX::XMVECTOR textSize = mSpriteFontNormal->MeasureString(buffer);
 
-  // TODO: draw box
+  mBasicEffect->Apply(device.d3DDeviceConext);
+  device.d3DDeviceConext->IASetInputLayout(mInputLayout);
+
+  float left = mBufferDesc.Width - textSize.m128_f32[0];
+  float right = mBufferDesc.Width;
+  float top = 0.0f;
+  float bottom = textSize.m128_f32[1];
+  DirectX::VertexPositionColor v1(DirectX::XMFLOAT3(left, top, 0.0), DirectX::XMFLOAT4(0.0,0.0,0.0,1.0));
+  DirectX::VertexPositionColor v2(DirectX::XMFLOAT3(right, top, 0.0), DirectX::XMFLOAT4(0.0,0.0,0.0,1.0));
+  DirectX::VertexPositionColor v3(DirectX::XMFLOAT3(right, bottom, 0.0), DirectX::XMFLOAT4(0.0,0.0,0.0,1.0));
+  DirectX::VertexPositionColor v4(DirectX::XMFLOAT3(left, bottom, 0.0), DirectX::XMFLOAT4(0.0,0.0,0.0,1.0));
+
+  mPrimitiveBatch->Begin();
+  mPrimitiveBatch->DrawQuad(v1, v2, v3, v4);
+  mPrimitiveBatch->End();
 
   mSpriteBatch->Begin( DirectX::SpriteSortMode_Deferred );
-  mSpriteFontNormal->DrawString( mSpriteBatch.get(), buffer, DirectX::XMFLOAT2(10 , 10), Config::fontColour);
+  mSpriteFontNormal->DrawString( mSpriteBatch.get(), buffer, DirectX::XMFLOAT2(left , top), DirectX::Colors::White);
   mSpriteBatch->End();
 }
 

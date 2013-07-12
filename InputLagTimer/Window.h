@@ -7,6 +7,9 @@
 
 #include "SpriteBatch.h"
 #include "SpriteFont.h"
+#include "PrimitiveBatch.h"
+#include "VertexTypes.h"
+#include "Effects.h"
 
 struct InsensitiveCompare;
 
@@ -46,7 +49,7 @@ protected:
    */
   int drawColumn(const wchar_t* timerString, int x, int column, DirectX::SpriteFont* font, bool drawHeader = false);
 
-  void drawHUD();
+  void drawHUD(const WindowManager::Device& device);
 
   static TCHAR windowClassName[];
   static int windowCount;
@@ -64,4 +67,8 @@ protected:
   std::unique_ptr<DirectX::SpriteBatch> mSpriteBatch;
   std::vector<DirectX::SpriteFont*> mSpriteFonts;
   DirectX::SpriteFont* mSpriteFontNormal;
+
+  std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> mPrimitiveBatch;
+  std::unique_ptr<DirectX::BasicEffect> mBasicEffect;
+  ID3D11InputLayout* mInputLayout;
 };
