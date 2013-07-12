@@ -143,8 +143,8 @@ void Model::recordRecordValuesForHUD()
 void Model::resetErrors()
 {
   double timeSinseLastError = mLastTimeValue - mLastReportedErrorTime;
-  /* Reset if it's been 1.5 seconds */
-  if(!mIsCurrentErrorPermanent && timeSinseLastError > 1.5)
+  /* Reset if it's been 0.5 seconds */
+  if(!mIsCurrentErrorPermanent && timeSinseLastError > 0.5)
   {
     mCurrerntError = ERROR_TYPE_NONE;
   }
