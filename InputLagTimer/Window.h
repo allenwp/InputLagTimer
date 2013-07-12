@@ -60,6 +60,7 @@ protected:
   TCHAR* mWindowName;
   int mWindowNumber;
   IDXGIOutput* mDXGIOutput;
+  D3D11_VIEWPORT mViewport;
   IDXGISwapChain* mSwapChain;
   ID3D11RenderTargetView* mRenderTargetView;
   Model* mModel;
