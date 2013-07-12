@@ -164,6 +164,14 @@ Window::Window(HINSTANCE hInstance, const Setup::OutputSetting& outputSettings, 
 
   ShowWindow(hWnd, SW_SHOWNORMAL);
   UpdateWindow(hWnd);
+
+  /* Create the full-screen viewport */
+  mViewport.Width = mBufferDesc.Width;
+  mViewport.Height = mBufferDesc.Height;
+  mViewport.MinDepth = 0.0f;
+  mViewport.MaxDepth = 1.0f;
+  mViewport.TopLeftX = 0;
+  mViewport.TopLeftY = 0;
   
   /* Create the Swap Chain */
   IDXGIDevice* dxgiDevice = NULL;
@@ -273,6 +281,7 @@ void Window::initializeModel(const LARGE_INTEGER& startingCount, IDXGISwapChain*
 
 void Window::render(const WindowManager::Device& device)
 {
+  device.d3DDeviceConext->RSSetViewports(1, &mViewport);
   device.d3DDeviceConext->OMSetRenderTargets(1, &mRenderTargetView, NULL);
 
   device.d3DDeviceConext->ClearRenderTargetView( mRenderTargetView, Config::backgroundColour );
