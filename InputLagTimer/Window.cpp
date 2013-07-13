@@ -405,7 +405,7 @@ void Window::drawHUD(const WindowManager::Device& device)
   frame time
   +/-0.01ms
   */
-  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\nframe\ntime(max)\n%.2fms\nerror at\n%.1fms\n\nrender\nvariance\n%.2fms\nerror at\n%.1fms\n\nv0.8.0\n\ninputlag\n.allenwp\n.com",
+  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\nframe\ntime(max)\n%.2fms\nerror at\n%.1fms\n\nrender\nvariance\n%.2fms\nerror at\n%.1fms\n\nv0.8.1\n\ninputlag\n.allenwp\n.com",
     mWindowNumber, windowCount, mBufferDesc.Width, mBufferDesc.Height, static_cast<float>(mBufferDesc.RefreshRate.Numerator / mBufferDesc.RefreshRate.Denominator),
     mModel->getFPS(),
     static_cast<float>(mModel->getFrameTime() * 1000.0f), static_cast<float>(Config::longestFrameTime * 1000.0f),
