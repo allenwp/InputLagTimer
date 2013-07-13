@@ -402,7 +402,7 @@ void Window::drawHUD(const WindowManager::Device& device)
   max accuracy
   +/-0.01ms
   */
-  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\nv0.80\n\ninputlag\n.allenwp\n.com",
+  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\nv0.8.0\n\ninputlag\n.allenwp\n.com",
     mWindowNumber, windowCount, mBufferDesc.Width, mBufferDesc.Height, static_cast<float>(mBufferDesc.RefreshRate.Numerator / mBufferDesc.RefreshRate.Denominator),
     mModel->getFPS(),
     static_cast<float>(mModel->getAccuracy() * 1000.0f), static_cast<float>(Config::lowestAccuracy * 1000.0f),
