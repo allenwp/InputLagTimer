@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Config.h"
 
-double Config::lowestAccuracy = 0;
-double Config::highestJitter = 0;
+double Config::longestFrameTime = 0;
+double Config::highestRenderVariance = 0;
 
 int Config::numColumns = 2;
 DirectX::XMVECTOR Config::fontColour = { 0.0, 0.0, 0.0, 1.0f };
@@ -10,10 +10,10 @@ float Config::backgroundColour[4] = { 1.0, 1.0, 1.0, 1.0f };
 
 void Config::config()
 {
-  int lowestAccuracy = GetPrivateProfileInt(L"FAILSAFES", L"lowest_accuracy", 10, L".\\config.ini");
-  Config::lowestAccuracy = (double)lowestAccuracy / 10000.0;
-  int highestJitter = GetPrivateProfileInt(L"FAILSAFES", L"highest_jitter", 10, L".\\config.ini");
-  Config::highestJitter = (double)highestJitter / 10000.0;
+  int longestFrameTime = GetPrivateProfileInt(L"FAILSAFES", L"longest_frame_time", 10, L".\\config.ini");
+  Config::longestFrameTime = (double)longestFrameTime / 10000.0;
+  int highestRenderVariance = GetPrivateProfileInt(L"FAILSAFES", L"highest_render_variance", 10, L".\\config.ini");
+  Config::highestRenderVariance = (double)highestRenderVariance / 10000.0;
   
   Config::numColumns = GetPrivateProfileInt(L"DISPLAY", L"num_columns", 2, L".\\config.ini");
 

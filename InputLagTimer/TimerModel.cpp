@@ -14,8 +14,8 @@ int Model::mFPS = 0;
 double Model::mPreviousTimeValue = 0;
 double Model::mFPSTime = 0;
 
-double Model::mLowestAccuracy = 0.0;
-double Model::mDisplayAccuracy = 0.0;
+double Model::mLongestFrameTime = 0.0;
+double Model::mDisplayLongestFrameTime = 0.0;
 
 double Model::mLastTimeValue = 0.0;
 double Model::mLastReportedErrorTime = 0.0;
@@ -43,7 +43,7 @@ void Model::loopStarted(const std::vector<Model*>& models)
   }
   mLastRenderTimeVariance = highRenderTime - lowRenderTime;
 
-  if(mLastRenderTimeVariance > Config::highestJitter)
+  if(mLastRenderTimeVariance > Config::highestRenderVariance)
   {
     Model::reportError(ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH, false);
   }
@@ -53,32 +53,29 @@ void Model::loopStarted(const std::vector<Model*>& models)
     mMaxRenderTimeVariance = mLastRenderTimeVariance;
   }
 
-  /* Accuracy reporting */
-  auto accuracyIter = models.begin();
-  double firstAccuracy = (*accuracyIter)->mLastAccuracy;
-  double lowAccuracy = firstAccuracy;
-  ++accuracyIter;
-  while(accuracyIter != models.end())
+  /* FrameTime reporting */
+  auto frameTimeIter = models.begin();
+  double firstFrameTime = (*frameTimeIter)->mLastFrameTime;
+  double longestFrameTime = firstFrameTime;
+  ++frameTimeIter;
+  while(frameTimeIter != models.end())
   {
-    double accuracy = (*accuracyIter)->mLastAccuracy;
-    if(accuracy > lowAccuracy)
+    double frameTime = (*frameTimeIter)->mLastFrameTime;
+    if(frameTime > longestFrameTime)
     {
-      lowAccuracy = accuracy;
+      longestFrameTime = frameTime;
     }
-    ++accuracyIter;
+    ++frameTimeIter;
   }
 
-  /* Add the render time variance to the lowest accuracy for total accuracy rating. */
-  lowAccuracy += mLastRenderTimeVariance;
-
-  if(lowAccuracy > Config::lowestAccuracy)
+  if(longestFrameTime > Config::longestFrameTime)
   {
-    reportError(ERROR_TYPE_ACCURACY_TOO_LOW, false);
+    reportError(ERROR_TYPE_FRAME_TIME_TOO_LONG, false);
   }
 
-  if(lowAccuracy > mLowestAccuracy)
+  if(longestFrameTime > mLongestFrameTime)
   {
-    mLowestAccuracy = lowAccuracy;
+    mLongestFrameTime = longestFrameTime;
   }
 
   recordRecordValuesForHUD();
@@ -105,12 +102,12 @@ Model::ErrorType Model::getCurrentError()
   return mCurrerntError;
 }
 
-double Model::getAccuracy()
+double Model::getFrameTime()
 {
-  return mDisplayAccuracy;
+  return mDisplayLongestFrameTime;
 }
 
-double Model::getJitter()
+double Model::getRenderVariance()
 {
   return mDisplayRenderTimeVariance;
 }
@@ -133,8 +130,8 @@ void Model::recordRecordValuesForHUD()
     mDisplayRenderTimeVariance = mMaxRenderTimeVariance;
     mMaxRenderTimeVariance = 0.0;
 
-    mDisplayAccuracy = mLowestAccuracy;
-    mLowestAccuracy = 0.0;
+    mDisplayLongestFrameTime = mLongestFrameTime;
+    mLongestFrameTime = 0.0;
   }
 
   mPreviousTimeValue = mLastTimeValue;
@@ -155,7 +152,7 @@ Model::Model(LARGE_INTEGER startingCount, IDXGISwapChain* swapChain)
   mLastCount(startingCount),
   mLastRenderTime(0.0),
   mColumn(0),
-  mLastAccuracy(0.0)
+  mLastFrameTime(0.0)
 {
   mCountsSinceRefresh.QuadPart = 0;
 
@@ -203,7 +200,7 @@ void Model::update()
   countSinceLast.QuadPart = currentCount.QuadPart - mLastCount.QuadPart;
   double secondsSinceLast = ((double)countSinceLast.QuadPart) / performanceFrequency.QuadPart;
 
-  mLastAccuracy = secondsSinceLast;
+  mLastFrameTime = secondsSinceLast;
 
   /* Timer Value */
   ULONGLONG fullTimerValue = secondsSinceStart * 100000.0 + 0.5; /* Add 0.5 to round */

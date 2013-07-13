@@ -333,10 +333,10 @@ void Window::renderModel(Model* model, const WindowManager::Device& device)
       errorMessage = L"Performance counter has overflowed.\nPlease close and re-open this program.";
       break;
     case Model::ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH:
-      errorMessage = L"Jitter (render time variance) too high.\nWaiting for stability...";
+      errorMessage = L"Render time variance too high.\nWaiting for stability...";
       break;
-    case Model::ERROR_TYPE_ACCURACY_TOO_LOW:
-      errorMessage = L"Timer accuracy too low.\nWaiting for stability...";
+    case Model::ERROR_TYPE_FRAME_TIME_TOO_LONG:
+      errorMessage = L"Timer frame time too long.\nWaiting for stability...";
       break;
     }
     mSpriteFontNormal->DrawString( mSpriteBatch.get(), errorMessage.c_str(), DirectX::XMFLOAT2(10 , 10), DirectX::Colors::White);
@@ -382,12 +382,14 @@ void Window::drawHUD(const WindowManager::Device& device)
 
   542FPS
 
-  accuracy
-  +/-5.23ms
+  frame
+  time(max)
+  5.23ms
   error at
-  +/-10.0ms
+  10.0ms
 
-  jitter
+  render
+  variance
   2.45ms
   error at
   2.0ms
@@ -399,14 +401,15 @@ void Window::drawHUD(const WindowManager::Device& device)
   FUTURE:
   time drift
   0.00045ms/1ms
-  max accuracy
+  shortest
+  frame time
   +/-0.01ms
   */
-  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\naccuracy\n+/-%.2fms\nerror at\n+/-%.1fms\n\njitter\n%.2fms\nerror at\n%.1fms\n\nv0.8.0\n\ninputlag\n.allenwp\n.com",
+  _snwprintf_s(buffer, 250, L"output%d/%d\n%dx%d\n%.2fHz\n\n%dFPS\n\nframe\ntime(max)\n%.2fms\nerror at\n%.1fms\n\nrender\nvariance\n%.2fms\nerror at\n%.1fms\n\nv0.8.0\n\ninputlag\n.allenwp\n.com",
     mWindowNumber, windowCount, mBufferDesc.Width, mBufferDesc.Height, static_cast<float>(mBufferDesc.RefreshRate.Numerator / mBufferDesc.RefreshRate.Denominator),
     mModel->getFPS(),
-    static_cast<float>(mModel->getAccuracy() * 1000.0f), static_cast<float>(Config::lowestAccuracy * 1000.0f),
-    static_cast<float>(mModel->getJitter() * 1000.0f), static_cast<float>(Config::highestJitter * 1000.0f));
+    static_cast<float>(mModel->getFrameTime() * 1000.0f), static_cast<float>(Config::longestFrameTime * 1000.0f),
+    static_cast<float>(mModel->getRenderVariance() * 1000.0f), static_cast<float>(Config::highestRenderVariance * 1000.0f));
   DirectX::XMVECTOR textSize = mSpriteFontNormal->MeasureString(buffer);
 
   mBasicEffect->Apply(device.d3DDeviceConext);

@@ -16,7 +16,7 @@ public:
     ERROR_TYPE_NONE,
     ERROR_TYPE_COUNTER_OVERFLOW, /* Program needs restart because the performance counter has no defined maximum and has wrapped around. */
     ERROR_TYPE_RENDER_TIME_VARIANCE_TOO_HIGH,
-    ERROR_TYPE_ACCURACY_TOO_LOW
+    ERROR_TYPE_FRAME_TIME_TOO_LONG
   };
 
   static void loopStarted(const std::vector<Model*>& models);
@@ -28,14 +28,14 @@ public:
   static ErrorType getCurrentError();
 
   /**
-   * @return The lowest accuracy reported over the last second.
+   * @return The longest frame time reported over the last second.
    */
-  static double getAccuracy();
+  static double getFrameTime();
 
   /**
    * @return The maximum render time variance in seconds that has been reported over the last second.
    */
-  static double getJitter();
+  static double getRenderVariance();
 
   /**
    * @return The frames counted over the last second.
@@ -80,8 +80,8 @@ protected:
   static double mPreviousTimeValue;
   static double mFPSTime;
   
-  static double mLowestAccuracy;
-  static double mDisplayAccuracy;
+  static double mLongestFrameTime;
+  static double mDisplayLongestFrameTime;
 
   /** In seconds. Timer models write to this for use in static error checking and update
       functions so they do not need to make another queryPerofrmanceCounter call. */
@@ -100,7 +100,7 @@ protected:
   int mColumn;
 
   double mLastRenderTime;
-  /** The last accuracy in seconds */
-  double mLastAccuracy;
+  /** The last frame time in seconds */
+  double mLastFrameTime;
 };
 

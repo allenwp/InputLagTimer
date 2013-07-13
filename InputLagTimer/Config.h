@@ -5,8 +5,8 @@ class Config
 public:
   static void config();
 
-  static double lowestAccuracy;
-  static double highestJitter;
+  static double longestFrameTime;
+  static double highestRenderVariance;
 
   static int numColumns;
   static DirectX::XMVECTOR fontColour;
