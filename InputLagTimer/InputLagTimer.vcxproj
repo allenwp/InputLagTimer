@@ -61,7 +61,8 @@
     </Link>
     <CustomBuildStep>
       <Command>rd "$(OutDir)\res" /s /q
-xcopy /y /c "$(ProjectDir)\res\*" "$(OutDir)\res" /i /e</Command>
+xcopy /y /c "$(ProjectDir)\res\*" "$(OutDir)\res" /i /e
+xcopy /y /c "$(ProjectDir)\dependencies\*" "$(OutDir)" /i /e</Command>
       <Outputs>fake_file.file</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
@@ -85,7 +86,8 @@ xcopy /y /c "$(ProjectDir)\res\*" "$(OutDir)\res" /i /e</Command>
     </Link>
     <CustomBuildStep>
       <Command>rd "$(OutDir)\res" /s /q
-xcopy /y /c "$(ProjectDir)\res\*" "$(OutDir)\res" /i /e</Command>
+xcopy /y /c "$(ProjectDir)\res\*" "$(OutDir)\res" /i /e
+xcopy /y /c "$(ProjectDir)\dependencies\*" "$(OutDir)" /i /e</Command>
       <Outputs>fake_file.file</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
